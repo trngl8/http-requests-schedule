@@ -15,7 +15,7 @@ class HttpClient
     public function get(string $url): void
     {
         try {
-            $response = $this->sedRequest($url);
+            $response = $this->sendRequest($url);
         } catch (TransportException $e) {
             echo $e->getMessage();
             return;
@@ -29,7 +29,10 @@ class HttpClient
         return $this->response;
     }
 
-    private function sedRequest(string $url): \stdClass
+    /**
+     * @throws TransportException
+     */
+    private function sendRequest(string $url): \stdClass
     {
         $response = new \stdClass();
 
@@ -42,8 +45,10 @@ class HttpClient
         $result = curl_exec($curl);
 
         if (curl_errno($curl)) {
+            $erno = curl_errno($curl);
+            $error = curl_error($curl);
             curl_close($curl);
-            throw new TransportException(sprintf('Curl error: %d %s', curl_errno($curl), curl_error($curl)));
+            throw new TransportException(sprintf('Curl transport error: %d %s on url "%s"', $erno, $error, $url));
         }
 
         $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);

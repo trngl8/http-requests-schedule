@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class HttpClientTest extends TestCase
 {
-    public function testServer404Success(): void
+    public function testServerAnyUrl(): void
     {
         $target = new HttpClient();
         $target->get('any url');
