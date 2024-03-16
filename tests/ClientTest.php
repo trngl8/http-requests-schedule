@@ -14,5 +14,6 @@ class ClientTest extends TestCase
         $target->get('http://localhost:8080');
         $result = $target->getResponse();
         $this->assertEquals(200, $result->statusCode);
+        $this->assertEquals(533, strlen($result->content));
     }
 }
