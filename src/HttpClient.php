@@ -6,40 +6,53 @@ class HttpClient
 {
     private $response;
 
+    public function __construct()
+    {
+        $this->response = new \stdClass();
+        $this->response->statusCode = 404;
+    }
+
     public function get(string $url): void
     {
-        //TODO: validate $url
+        try {
+            $response = $this->sedRequest($url);
+        } catch (TransportException $e) {
+            echo $e->getMessage();
+            return;
+        }
+
+        $this->response = $response;
+    }
+
+    public function getResponse(): \stdClass
+    {
+        return $this->response;
+    }
+
+    private function sedRequest(string $url): \stdClass
+    {
+        $response = new \stdClass();
+
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_HEADER, false);
 
-        try {
-            $result = curl_exec($curl);
+        $result = curl_exec($curl);
 
-            //TODO: implement response object or use external dependency
-            $this->response = new \stdClass();
-
-            if (curl_errno($curl)) {
-                echo 'Curl error: ' . curl_error($curl);
-                $this->response->statusCode = 404;
-                $this->response->content = $result;
-                return;
-            }
-
-            $this->response->statusCode = 200;
-            $this->response->content = $result;
-        } catch (\Exception $e) {
-            $this->response->statusCode = 500;
-            $this->response->content = $e->getMessage();
-        } finally {
+        if (curl_errno($curl)) {
             curl_close($curl);
+            throw new TransportException(sprintf('Curl error: %d %s', curl_errno($curl), curl_error($curl)));
         }
-    }
 
-    public function getResponse(): \stdClass
-    {
-        return $this->response;
+        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        $response->statusCode = $status;
+        $response->content = $result;
+
+        curl_close($curl);
+
+        return $response;
     }
 }
