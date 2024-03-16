@@ -2,14 +2,19 @@
 
 namespace App;
 
+use Monolog\Logger;
+
 class HttpClient
 {
     private $response;
 
-    public function __construct()
+    private $logger;
+
+    public function __construct(Logger $logger)
     {
         $this->response = new \stdClass();
         $this->response->statusCode = 404;
+        $this->logger = $logger;
     }
 
     public function get(string $url): void
@@ -17,7 +22,7 @@ class HttpClient
         try {
             $response = $this->sendRequest('GET', $url);
         } catch (TransportException $e) {
-            echo $e->getMessage() . PHP_EOL;
+            $this->logger->error($e->getMessage());
             return;
         }
 
@@ -29,7 +34,7 @@ class HttpClient
         try {
             $response = $this->sendRequest('POST', $url, $data);
         } catch (TransportException $e) {
-            echo $e->getMessage() . PHP_EOL;
+            $this->logger->error($e->getMessage());
             return;
         }
 
