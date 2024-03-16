@@ -5,7 +5,7 @@ namespace App\tests\e2e;
 use App\HttpClient;
 use PHPUnit\Framework\TestCase;
 
-class ClientTest extends TestCase
+class HttpClientTest extends TestCase
 {
     public function testServer404Success(): void
     {
