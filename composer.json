@@ -17,6 +17,7 @@
         }
     },
     "scripts": {
-        "tests": "vendor/bin/phpunit tests"
+        "tests": "vendor/bin/phpunit tests/unit",
+        "tests-e2e": "vendor/bin/phpunit tests/e2e"
     }
 }
