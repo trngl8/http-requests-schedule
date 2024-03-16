@@ -4,10 +4,15 @@ namespace App\Tests;
 
 use PHPUnit\Framework\TestCase;
 
+use App\HttpClient;
+
 class ClientTest extends TestCase
 {
     public function testSomething(): void
     {
-        $this->assertTrue(false);
+        $target = new HttpClient();
+        $target->get('http://localhost:8080');
+        $result = $target->getResponse();
+        $this->assertEquals(200, $result->statusCode);
     }
 }
