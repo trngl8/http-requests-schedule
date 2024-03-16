@@ -12,10 +12,12 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\Module\\": "tests/unit",
+            "Tests\\EndToEnd\\": "tests/e2e"
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit tests"
+        "tests": "vendor/bin/phpunit tests/unit",
+        "tests-e2e": "vendor/bin/phpunit tests/e2e"
     }
 }
