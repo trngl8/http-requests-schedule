@@ -12,7 +12,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\Module": "tests/unit",
+            "Tests\\EndToEnd": "tests/e2e"
         }
     },
     "scripts": {

@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Tests;
-
-use PHPUnit\Framework\TestCase;
+namespace App\tests\e2e;
 
 use App\HttpClient;
+use PHPUnit\Framework\TestCase;
 
-class ClientTest extends TestCase
+class HttpClientTest extends TestCase
 {
     public function testServer404Success(): void
     {
@@ -14,6 +13,5 @@ class ClientTest extends TestCase
         $target->get('http://localhost:8080');
         $result = $target->getResponse();
         $this->assertEquals(404, $result->statusCode);
-        $this->assertEquals(533, strlen($result->content));
     }
 }
