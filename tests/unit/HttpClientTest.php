@@ -13,4 +13,11 @@ class HttpClientTest extends TestCase
         $target->get('any url');
         $this->assertTrue(true);
     }
+
+    public function testServerPostAnyUrl(): void
+    {
+        $target = new HttpClient();
+        $target->post('any url', ['key' => 'value']);
+        $this->assertTrue(true);
+    }
 }

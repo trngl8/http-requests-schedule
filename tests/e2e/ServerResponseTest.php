@@ -14,4 +14,12 @@ class ServerResponseTest extends TestCase
         $result = $target->getResponse();
         $this->assertEquals(404, $result->statusCode);
     }
+
+    public function testServerPostEmpty(): void
+    {
+        $target = new HttpClient();
+        $target->post('http://localhost:8080', ['key' => 'value']);
+        $result = $target->getResponse();
+        $this->assertEquals(404, $result->statusCode);
+    }
 }

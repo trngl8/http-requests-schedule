@@ -15,9 +15,21 @@ class HttpClient
     public function get(string $url): void
     {
         try {
-            $response = $this->sendRequest($url);
+            $response = $this->sendRequest('GET', $url);
         } catch (TransportException $e) {
-            echo $e->getMessage();
+            echo $e->getMessage() . PHP_EOL;
+            return;
+        }
+
+        $this->response = $response;
+    }
+
+    public function post(string $url, array $data): void
+    {
+        try {
+            $response = $this->sendRequest('POST', $url, $data);
+        } catch (TransportException $e) {
+            echo $e->getMessage() . PHP_EOL;
             return;
         }
 
@@ -32,15 +44,24 @@ class HttpClient
     /**
      * @throws TransportException
      */
-    private function sendRequest(string $url): \stdClass
+    private function sendRequest(string $method, string $url, array $data = []): \stdClass
     {
         $response = new \stdClass();
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_HEADER, false);
+
+        if ($method === 'POST') {
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+        } elseif ($method === 'GET') {
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($curl, CURLOPT_HEADER, false);
+            curl_setopt($curl, CURLOPT_HTTPGET, true);
+        } else {
+            throw new TransportException('Invalid method');
+        }
 
         $result = curl_exec($curl);
 
