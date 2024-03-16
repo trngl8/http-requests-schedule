@@ -8,7 +8,8 @@ class HttpClient
 
     public function get(string $url): void
     {
-        // TODO check $url
+        // TODO: check $url
+        // TODO: use curl sending request functions (and external dependency)
         $this->response = new \stdClass();
         $this->response->statusCode = 200;
     }
