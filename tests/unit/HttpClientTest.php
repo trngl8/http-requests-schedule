@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit;
 
+use App\DataRepository;
 use App\HttpClient;
 use App\HttpTransportInterface;
 use Monolog\Logger;
@@ -13,8 +14,9 @@ class HttpClientTest extends TestCase
     {
         $transport = $this->createMock(HttpTransportInterface::class);
         $logger = $this->createMock(Logger::class);
+        $repository = $this->createMock(DataRepository::class);
         $transport->method('get')->willReturn('any response');
-        $target = new HttpClient($transport, $logger);
+        $target = new HttpClient($transport, $logger, $repository);
         $target->get('any url');
         $this->assertTrue(true);
     }
@@ -23,7 +25,8 @@ class HttpClientTest extends TestCase
     {
         $transport = $this->createMock(HttpTransportInterface::class);
         $logger = $this->createMock(Logger::class);
-        $target = new HttpClient($transport, $logger);
+        $repository = $this->createMock(DataRepository::class);
+        $target = new HttpClient($transport, $logger, $repository);
         $target->post('any url', ['key' => 'value']);
         $this->assertTrue(true);
     }
