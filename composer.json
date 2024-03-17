@@ -2,6 +2,7 @@
     "require": {
         "php": ">=8.2.10",
         "ext-curl": "*",
+        "ext-sqlite3": "*",
         "monolog/monolog": "^3.5"
     },
     "require-dev": {
