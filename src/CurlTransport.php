@@ -6,11 +6,16 @@ class CurlTransport implements HttpTransportInterface
 {
     private int $status;
 
+    const PATTERN = '/[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/ig';
     /**
      * @throws CurlException
      */
     public function get(string $url): string
     {
+        if(!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new CurlException(sprintf('Invalid URL %s', $url));
+        }
+
         return $this->sendRequest($url);
     }
 
@@ -19,6 +24,10 @@ class CurlTransport implements HttpTransportInterface
      */
     public function post(string $url, array $data): string
     {
+        if(!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new CurlException(sprintf('Invalid URL %s', $url));
+        }
+
         return $this->sendRequest($url, 'POST', $data);
     }
 
