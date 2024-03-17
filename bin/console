@@ -16,7 +16,4 @@ $db->enableExceptions(true);
 $db->query('DROP TABLE IF EXISTS requests');
 
 $createTablesSql = file_get_contents(__DIR__ . '/../database/init_requests.sql');
-//TODO: create table requests
 echo "Created table requests\n";
-
-
