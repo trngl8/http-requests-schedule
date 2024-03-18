@@ -1,0 +1,32 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$db = new \SQLite3(__DIR__ . '/../var/requests.table.db', SQLITE3_OPEN_READONLY);
+
+$db->enableExceptions(true);
+
+
+$statement = $db->prepare('SELECT * FROM requests WHERE code >= ?');
+$statement->bindValue(1, 0);
+
+$messages = $statement->execute();
+
+$list = [];
+
+while ($item = $messages->fetchArray(SQLITE3_ASSOC)) {
+    $list[] = $item;
+}
+
+$db->close();
+
+if (empty($list)) {
+    echo "No records found\n";
+    exit;
+}
+
+foreach ($list as $item) {
+    echo sprintf('URL: %s, Method: %s, Code: %d, Created at: %s', $item['url'], $item['method'], $item['code'], $item['created_at']);
+    echo "\n";
+}
