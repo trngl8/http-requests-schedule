@@ -11,6 +11,10 @@ class CurlTransport implements HttpTransportInterface
      */
     public function get(string $url): string
     {
+        if(!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new CurlException(sprintf('Invalid URL %s', $url));
+        }
+
         return $this->sendRequest($url);
     }
 
@@ -19,6 +23,10 @@ class CurlTransport implements HttpTransportInterface
      */
     public function post(string $url, array $data): string
     {
+        if(!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new CurlException(sprintf('Invalid URL %s', $url));
+        }
+
         return $this->sendRequest($url, 'POST', $data);
     }
 
