@@ -11,6 +11,12 @@
         <ini name="error_reporting" value="-1" />
     </php>
 
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+
     <testsuites>
         <testsuite name="Unit Test Suite">
             <directory>tests/unit</directory>
@@ -19,4 +25,13 @@
             <directory>tests/e2e</directory>
         </testsuite>
     </testsuites>
+
+    <coverage includeUncoveredFiles="true"
+              pathCoverage="false"
+              ignoreDeprecatedCodeUnits="true"
+              disableCodeCoverageIgnore="true">
+        <report>
+            <html outputDirectory="var/html-coverage"/>
+        </report>
+    </coverage>
 </phpunit>

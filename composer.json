@@ -21,7 +21,7 @@
         }
     },
     "scripts": {
-        "unit": "vendor/bin/phpunit tests/unit",
+        "unit": "XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit --coverage-text",
         "e2e": "vendor/bin/phpunit tests/e2e"
     }
 }
