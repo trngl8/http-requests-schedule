@@ -44,6 +44,45 @@ class BaseController
         return new RedirectResponse('/#redirected', 302);
     }
 
+    public function add(Request $request): Response
+    {
+        if ($request->getMethod() === 'GET') {
+            return new Response($this->render('add.html.php'));
+        }
+
+        $errors = $this->validate($request);
+
+        if (count($errors) > 0) {
+            return new Response($this->render('add.html.php', ['errors' => $errors]));
+        }
+
+        $db = new \SQLite3('../var/requests.table.db', SQLITE3_OPEN_READWRITE);
+        $db->enableExceptions(true);
+        $db->exec('BEGIN');
+        $statement = $db->prepare('INSERT INTO requests(url, method, code) VALUES(:url, :method, :code)');
+        $statement->bindValue(':url', $request->request->get('url'));
+        $statement->bindValue(':method', $request->request->get('method'));
+        $statement->bindValue(':code', 0);
+        $statement->execute();
+        $db->exec('COMMIT');
+        $db->close();
+
+        return new RedirectResponse('/#added', 302);
+    }
+
+    public function result(Request $request): Response
+    {
+        $url = $request->get('url');
+        $db = new \SQLite3('../var/requests.table.db', SQLITE3_OPEN_READWRITE);
+        $db->enableExceptions(true);
+        $statement = $db->prepare('SELECT * FROM requests  WHERE url=?');
+        $statement->bindValue(1, $url);
+        $result = $statement->execute();
+        $item = $result->fetchArray(SQLITE3_ASSOC);
+        $db->close();
+        return new Response($this->render('result.html.php', ['item' => $item]));
+    }
+
     private function render(string $template, array $data = []): string
     {
         extract($data);
@@ -55,5 +94,23 @@ class BaseController
     private function validateUrl(string $url): bool
     {
         return filter_var($url, FILTER_VALIDATE_URL);
+    }
+
+    private function validate(Request $request): array
+    {
+        $errors = [];
+        if (!$request->request->get('url')) {
+            $errors['url'] = 'URL is required';
+        }
+        if (!$request->request->get('method')) {
+            $errors['method'] = 'Method is required';
+        }
+        if (!in_array($request->request->get('method') , ['GET', 'POST'])) {
+            $errors['method'] = 'Invalid method';
+        }
+        if (!filter_var($request->request->get('url'), FILTER_VALIDATE_URL)) {
+            $errors['url'] = 'Invalid URL';
+        }
+        return $errors;
     }
 }

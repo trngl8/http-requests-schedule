@@ -37,7 +37,7 @@
             <button type="submit" class="btn btn-primary btn-lg px-4">RUN</button>
         </form>
         <?php if ($jobs): ?>
-            <table class="table">
+            <table class="table" aria-describedby="http-jobs">
                 <thead>
                 <tr>
                     <th scope="col">Method</th>
@@ -61,8 +61,15 @@
                     <th scope="row"><?=$job['method'];?></th>
                     <td><?=$job['url'];?></td>
                     <td><?=$job['created_at'];?></td>
-                    <td><span class="badge text-bg-<?=$job['status_color'] ?>"><?=$job['code'];?></span></td>
-                    <td><a class="btn btn-sm btn-outline-primary" href="/result?url=<?=$job['url'];?>">Result</a></td>
+                    <td>
+                        <?php if ($job['code'] > 0) : ?>
+                        <span class="badge text-bg-<?=$job['status_color'] ?>"><?=$job['code'];?></span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if ($job['code'] > 0) : ?>
+                        <a class="btn btn-sm btn-outline-primary" href="/result?url=<?=$job['url'];?>">Result</a></td>
+                        <?php endif; ?>
                 </tr>
                 <?php endforeach; ?>
                 </tbody>
