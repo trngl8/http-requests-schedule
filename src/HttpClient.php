@@ -2,44 +2,75 @@
 
 namespace App;
 
-use Monolog\Logger;
-
-class HttpClient
+class HttpClient implements HttpClientInterface
 {
-    private ResponseData $response;
+    private int $status;
 
-    private HttpTransportInterface $transport;
+    private array $availableMethods = ['GET', 'POST'];
 
-    private DataRepository $repository;
-
-    private $logger;
-
-    public function __construct(HttpTransportInterface $transport, Logger $logger, DataRepository $repository)
+    /**
+     * @throws TransportException
+     */
+    public function request(string $method, string $url, array $data = []): string
     {
-        $this->response = new ResponseData(404, '404 Not Found');
-        $this->logger = $logger;
-        $this->transport = $transport;
-        $this->repository = $repository;
+        if (!in_array($method, $this->availableMethods)) {
+            throw new TransportException(sprintf('Invalid method %s', $method));
+        }
+
+        if(!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new TransportException(sprintf('Invalid URL %s', $url));
+        }
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+        if ($method === 'GET') {
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($curl, CURLOPT_HTTPGET, true);
+        }
+
+        if ($method === 'POST') {
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+        }
+
+        $result = curl_exec($curl);
+
+        if (!$result) {
+            $erno = curl_errno($curl);
+            $error = curl_error($curl);
+            curl_close($curl);
+            throw new TransportException(sprintf('Curl transport error: %d %s on url "%s"', $erno, $error, $url));
+        }
+
+        $this->status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        curl_close($curl);
+        return $result;
     }
 
-    public function get(string $url): void
+    public function getStatusCode(): int
     {
-        $result = $this->transport->get($url);
-        $this->response = new ResponseData($this->transport->getStatusCode(), $result);
-        $this->logger->info(sprintf('GET %s : %d', $url, $this->transport->getStatusCode()));
-        $this->repository->save($url, 'GET', $this->transport->getStatusCode());
+        return $this->status;
     }
 
-    public function post(string $url, array $data): void
+    public function getHeaders(): array
     {
-        $result = $this->transport->post($url, $data);
-        $this->response = new ResponseData($this->transport->getStatusCode(), $result);
-        $this->logger->info(sprintf('POST %s : %d', $url, $this->transport->getStatusCode()), $data);
-        $this->repository->save($url, 'POST', $this->transport->getStatusCode());
+        return [];
     }
 
-    public function getResponse(): ResponseData
+    public function getHeader(string $name): string
     {
-        return $this->response;
+        if (array_key_exists($name, $this->getHeaders())) {
+            return $this->getHeaders()[$name];
+        }
+
+        return '';
+    }
+
+    public function getBody(): string
+    {
+        return '';
     }
 }
