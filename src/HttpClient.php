@@ -9,16 +9,16 @@ class HttpClient implements HttpClientInterface
     private array $availableMethods = ['GET', 'POST'];
 
     /**
-     * @throws CurlException
+     * @throws TransportException
      */
-    public function request(string $method = 'GET', string $url = '', array $data = []): string
+    public function request(string $method, string $url, array $data = []): string
     {
         if (!in_array($method, $this->availableMethods)) {
-            throw new CurlException(sprintf('Invalid method %s', $method));
+            throw new TransportException(sprintf('Invalid method %s', $method));
         }
 
         if(!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new CurlException(sprintf('Invalid URL %s', $url));
+            throw new TransportException(sprintf('Invalid URL %s', $url));
         }
 
         $curl = curl_init();
@@ -41,7 +41,7 @@ class HttpClient implements HttpClientInterface
             $erno = curl_errno($curl);
             $error = curl_error($curl);
             curl_close($curl);
-            throw new CurlException(sprintf('Curl transport error: %d %s on url "%s"', $erno, $error, $url));
+            throw new TransportException(sprintf('Curl transport error: %d %s on url "%s"', $erno, $error, $url));
         }
 
         $this->status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
