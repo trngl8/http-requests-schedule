@@ -2,9 +2,9 @@
 
 namespace App\Tests\EndToEnd;
 
-use App\CurlTransport;
 use App\DataRepository;
 use App\HttpClient;
+use App\HttpService;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
@@ -17,7 +17,7 @@ class ServerResponseTest extends TestCase
         $repository = new DataRepository();
         $logger = new Logger('test');
         $logger->pushHandler(new StreamHandler('var/logs/http.log', Level::Info));
-        $target = new HttpClient(new CurlTransport(), $logger, $repository);
+        $target = new HttpService(new HttpClient(), $logger, $repository);
         $target->get('http://localhost:8080');
         $result = $target->getResponse();
         $this->assertEquals(404, $result->statusCode);
@@ -28,7 +28,7 @@ class ServerResponseTest extends TestCase
         $repository = new DataRepository();
         $logger = new Logger('test');
         $logger->pushHandler(new StreamHandler('var/logs/http.log', Level::Info));
-        $target = new HttpClient(new CurlTransport(), $logger, $repository);
+        $target = new HttpService(new HttpClient(), $logger, $repository);
         $target->post('http://localhost:8080', ['key' => 'value']);
         $result = $target->getResponse();
         $this->assertEquals(404, $result->statusCode);

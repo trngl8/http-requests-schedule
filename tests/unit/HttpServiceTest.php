@@ -3,30 +3,30 @@
 namespace App\Tests\Unit;
 
 use App\DataRepository;
-use App\HttpClient;
-use App\HttpTransportInterface;
+use App\HttpClientInterface;
+use App\HttpService;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 
-class HttpClientTest extends TestCase
+class HttpServiceTest extends TestCase
 {
     public function testServerAnyUrl(): void
     {
-        $transport = $this->createMock(HttpTransportInterface::class);
+        $transport = $this->createMock(HttpClientInterface::class);
         $logger = $this->createMock(Logger::class);
         $repository = $this->createMock(DataRepository::class);
-        $transport->method('get')->willReturn('any response');
-        $target = new HttpClient($transport, $logger, $repository);
+        $transport->method('request')->willReturn('any response');
+        $target = new HttpService($transport, $logger, $repository);
         $target->get('any url');
         $this->assertTrue(true);
     }
 
     public function testServerPostAnyUrl(): void
     {
-        $transport = $this->createMock(HttpTransportInterface::class);
+        $transport = $this->createMock(HttpClientInterface::class);
         $logger = $this->createMock(Logger::class);
         $repository = $this->createMock(DataRepository::class);
-        $target = new HttpClient($transport, $logger, $repository);
+        $target = new HttpService($transport, $logger, $repository);
         $target->post('any url', ['key' => 'value']);
         $this->assertTrue(true);
     }
