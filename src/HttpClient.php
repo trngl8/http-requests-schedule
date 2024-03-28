@@ -4,9 +4,16 @@ namespace App;
 
 class HttpClient implements HttpClientInterface
 {
+    private TransportInterface $transport;
+
     private int $status;
 
     private array $availableMethods = ['GET', 'POST'];
+
+    public function __construct(TransportInterface $transport)
+    {
+        $this->transport = $transport;
+    }
 
     /**
      * @throws TransportException
@@ -21,32 +28,36 @@ class HttpClient implements HttpClientInterface
             throw new TransportException(sprintf('Invalid URL %s', $url));
         }
 
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        $this->transport
+            ->addOption(CURLOPT_URL, $url)
+            ->addOption(CURLOPT_RETURNTRANSFER, true)
+        ;
 
         if ($method === 'GET') {
-            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($curl, CURLOPT_HTTPGET, true);
+            $this->transport
+                ->addOption(CURLOPT_FOLLOWLOCATION, true)
+                ->addOption(CURLOPT_HTTPGET, true)
+            ;
         }
 
         if ($method === 'POST') {
-            curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+            $this->transport
+                ->addOption(CURLOPT_POST, true)
+                ->addOption(CURLOPT_POSTFIELDS, http_build_query($data))
+            ;
         }
 
-        $result = curl_exec($curl);
+        $result = $this->transport->execute();
 
         if (!$result) {
-            $erno = curl_errno($curl);
-            $error = curl_error($curl);
-            curl_close($curl);
-            throw new TransportException(sprintf('Curl transport error: %d %s on url "%s"', $erno, $error, $url));
+            $erno = $this->transport->getErrno();
+            $error = $this->transport->getError();
+            $this->transport->close();
+            throw new TransportException(sprintf('Curl transport error %d. %s on url "%s"', $erno, $error, $url));
         }
 
-        $this->status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $this->status = $this->transport->getInfo(CURLINFO_HTTP_CODE);
 
-        curl_close($curl);
         return $result;
     }
 
