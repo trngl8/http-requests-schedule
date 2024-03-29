@@ -22,12 +22,13 @@ class HttpClient implements HttpClientInterface
      */
     public function request(string $method, string $url, array $data = []): string
     {
+        // TODO: validate function
         if (!in_array($method, $this->availableMethods)) {
-            throw new ValidatorException(sprintf('Invalid method %s', $method));
+            throw new ValidatorException('method', $method);
         }
 
         if(!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new ValidatorException(sprintf('Invalid URL %s', $url));
+            throw new ValidatorException('url', $url);
         }
 
         $this->transport
