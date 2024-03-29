@@ -14,7 +14,7 @@ class HttpClientTest extends TestCase
         $transport = $this->createMock(TransportInterface::class);
         $target = new HttpClient($transport);
         $this->expectException(ValidatorException::class);
-        //$this->expectExceptionMessageMatches('/^Invalid URL (.+)$/');
+        $this->expectExceptionMessageMatches('/^URL is not allowed: (.+)$/');
         $target->request('GET', 'localhost');
     }
 
@@ -23,7 +23,7 @@ class HttpClientTest extends TestCase
         $transport = $this->createMock(TransportInterface::class);
         $target = new HttpClient($transport);
         $this->expectException(ValidatorException::class);
-        //$this->expectExceptionMessageMatches('/^Invalid method (.+)$/');
+        $this->expectExceptionMessageMatches('/^Method is not allowed: (.+)$/');
         $target->request('ANY', 'http://localhost');
     }
 
