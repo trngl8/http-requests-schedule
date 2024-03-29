@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Exception\{ValidatorException, TransportException};
+
 class HttpClient implements HttpClientInterface
 {
     private TransportInterface $transport;
@@ -16,17 +18,11 @@ class HttpClient implements HttpClientInterface
     }
 
     /**
-     * @throws TransportException
+     * @throws ValidatorException|TransportException
      */
     public function request(string $method, string $url, array $data = []): string
     {
-        if (!in_array($method, $this->availableMethods)) {
-            throw new TransportException(sprintf('Invalid method %s', $method));
-        }
-
-        if(!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new TransportException(sprintf('Invalid URL %s', $url));
-        }
+        $this->validate($method, $url);
 
         $this->transport
             ->addOption(CURLOPT_URL, $url)
@@ -83,5 +79,19 @@ class HttpClient implements HttpClientInterface
     public function getBody(): string
     {
         return '';
+    }
+
+    /**
+     * @throws ValidatorException
+     */
+    private function validate(string $method, string $url): void
+    {
+        if (!in_array($method, $this->availableMethods)) {
+            throw new ValidatorException('Method is not allowed', $method);
+        }
+
+        if(!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new ValidatorException('URL is not allowed', $url);
+        }
     }
 }

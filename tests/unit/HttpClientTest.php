@@ -2,8 +2,8 @@
 
 namespace App\Tests\Unit;
 
+use App\Exception\{TransportException, ValidatorException};
 use App\HttpClient;
-use App\TransportException;
 use App\TransportInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -13,8 +13,8 @@ class HttpClientTest extends TestCase
     {
         $transport = $this->createMock(TransportInterface::class);
         $target = new HttpClient($transport);
-        $this->expectException(TransportException::class);
-        $this->expectExceptionMessageMatches('/^Invalid URL (.+)$/');
+        $this->expectException(ValidatorException::class);
+        $this->expectExceptionMessageMatches('/^URL is not allowed: (.+)$/');
         $target->request('GET', 'localhost');
     }
 
@@ -22,8 +22,8 @@ class HttpClientTest extends TestCase
     {
         $transport = $this->createMock(TransportInterface::class);
         $target = new HttpClient($transport);
-        $this->expectException(TransportException::class);
-        $this->expectExceptionMessageMatches('/^Invalid method (.+)$/');
+        $this->expectException(ValidatorException::class);
+        $this->expectExceptionMessageMatches('/^Method is not allowed: (.+)$/');
         $target->request('ANY', 'http://localhost');
     }
 
