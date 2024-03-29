@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Exception\{ValidatorException, TransportException};
+
 class HttpClient implements HttpClientInterface
 {
     private TransportInterface $transport;
@@ -16,16 +18,16 @@ class HttpClient implements HttpClientInterface
     }
 
     /**
-     * @throws TransportException
+     * @throws ValidatorException|TransportException
      */
     public function request(string $method, string $url, array $data = []): string
     {
         if (!in_array($method, $this->availableMethods)) {
-            throw new TransportException(sprintf('Invalid method %s', $method));
+            throw new ValidatorException(sprintf('Invalid method %s', $method));
         }
 
         if(!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new TransportException(sprintf('Invalid URL %s', $url));
+            throw new ValidatorException(sprintf('Invalid URL %s', $url));
         }
 
         $this->transport

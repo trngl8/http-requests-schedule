@@ -1,8 +1,8 @@
 <?php
 
-namespace App;
+namespace App\Exception;
 
-class TransportException extends \Exception implements \Throwable
+class ValidatorException extends \Exception implements \Throwable
 {
     public function __construct(string $message)
     {
