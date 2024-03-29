@@ -22,14 +22,7 @@ class HttpClient implements HttpClientInterface
      */
     public function request(string $method, string $url, array $data = []): string
     {
-        // TODO: validate function
-        if (!in_array($method, $this->availableMethods)) {
-            throw new ValidatorException('method', $method);
-        }
-
-        if(!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new ValidatorException('url', $url);
-        }
+        $this->validate($method, $url);
 
         $this->transport
             ->addOption(CURLOPT_URL, $url)
@@ -86,5 +79,19 @@ class HttpClient implements HttpClientInterface
     public function getBody(): string
     {
         return '';
+    }
+
+    /**
+     * @throws ValidatorException
+     */
+    private function validate(string $method, string $url): void
+    {
+        if (!in_array($method, $this->availableMethods)) {
+            throw new ValidatorException('Method is not allowed', $method);
+        }
+
+        if(!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new ValidatorException('URL is not allowed', $url);
+        }
     }
 }
