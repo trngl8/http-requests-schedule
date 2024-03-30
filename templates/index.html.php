@@ -32,11 +32,11 @@
     <main>
         <h1 class="text-body-emphasis">http jobs</h1>
         <p class="fs-5 col-md-8 mb-5">Here is a queue ot the planned HTTP requests</p>
-        <form method="post" action="/run" class="mb-1">
-            <input type="hidden" id="action" name="action" value="run">
-            <button type="submit" class="btn btn-primary btn-lg px-4">RUN</button>
-        </form>
         <?php if ($jobs): ?>
+            <form method="post" action="/run" class="mb-1">
+                <input type="hidden" id="action" name="action" value="run">
+                <button type="submit" class="btn btn-primary btn-lg px-4">RUN</button>
+            </form>
             <table class="table" aria-describedby="http-jobs">
                 <thead>
                 <tr>
