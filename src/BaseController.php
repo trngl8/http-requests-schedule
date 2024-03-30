@@ -59,7 +59,7 @@ class BaseController
         $db = new \SQLite3('../var/requests.table.db', SQLITE3_OPEN_READWRITE);
         $db->enableExceptions(true);
         $db->exec('BEGIN');
-        $statement = $db->prepare('INSERT INTO requests(url, method, code) VALUES(:url, :method, :code)');
+        $statement = $db->prepare('INSERT INTO requests(method, url, code) VALUES(:method, :url, :code)');
         $statement->bindValue(':url', $request->request->get('url'));
         $statement->bindValue(':method', $request->request->get('method'));
         $statement->bindValue(':code', 0);
@@ -75,7 +75,7 @@ class BaseController
         $url = $request->get('url');
         $db = new \SQLite3('../var/requests.table.db', SQLITE3_OPEN_READWRITE);
         $db->enableExceptions(true);
-        $statement = $db->prepare('SELECT * FROM requests  WHERE url=?');
+        $statement = $db->prepare('SELECT * FROM requests WHERE url=?');
         $statement->bindValue(1, $url);
         $result = $statement->execute();
         $item = $result->fetchArray(SQLITE3_ASSOC);
