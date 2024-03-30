@@ -21,8 +21,8 @@ class BaseController
 
         $db->enableExceptions(true);
 
-        $statement = $db->prepare('SELECT * FROM requests WHERE code >= ?');
-        $statement->bindValue(1, 0);
+        $statement = $db->prepare('SELECT * FROM requests WHERE method = ?');
+        $statement->bindValue(1, 'GET');
 
         $list = [];
         $messages = $statement->execute();
@@ -59,10 +59,9 @@ class BaseController
         $db = new \SQLite3('../var/requests.table.db', SQLITE3_OPEN_READWRITE);
         $db->enableExceptions(true);
         $db->exec('BEGIN');
-        $statement = $db->prepare('INSERT INTO requests(method, url, code) VALUES(:method, :url, :code)');
+        $statement = $db->prepare('INSERT INTO requests(method, url) VALUES(:method, :url)');
         $statement->bindValue(':url', $request->request->get('url'));
         $statement->bindValue(':method', $request->request->get('method'));
-        $statement->bindValue(':code', 0);
         $statement->execute();
         $db->exec('COMMIT');
         $db->close();
