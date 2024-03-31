@@ -6,7 +6,7 @@ class CurlTransport implements TransportInterface
 {
     private $handler;
 
-    public function __construct(string $url)
+    public function init(string $url): void
     {
         $this->handler = curl_init($url);
     }

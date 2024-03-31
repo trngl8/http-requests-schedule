@@ -4,6 +4,8 @@ namespace App;
 
 interface TransportInterface
 {
+    public function init(string $url): void;
+
     public function addOption(int $name, $value): self;
 
     public function execute(): string;

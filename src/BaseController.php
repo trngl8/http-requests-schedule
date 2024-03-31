@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Exception\TransportException;
+use App\Exception\ValidatorException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +23,7 @@ class BaseController
 
         $db->enableExceptions(true);
 
-        $statement = $db->prepare('SELECT * FROM requests WHERE method = ?');
+        $statement = $db->prepare('SELECT req.*, res.code, res.body FROM requests req LEFT JOIN responses res ON req.id = res.request_id WHERE req.method = ?');
         $statement->bindValue(1, 'GET');
 
         $list = [];
@@ -35,11 +37,18 @@ class BaseController
         return new Response($this->render('index.html.php', array_merge($data, ['jobs' => $list])), 200);
     }
 
+    /**
+     * @throws TransportException
+     * @throws ValidatorException
+     */
     public function run(Request $request): Response
     {
-        $url = $request->get('url');
-        if ($url && !$this->validateUrl($url)) {
-            return new Response($this->render('error.html.php', ['error' => sprintf('Invalid URL %s', $url)]), 400);
+        //TODO: validate $request if exists
+        try {
+            $handler = new QueueHandler();
+            $handler->run();
+        } catch (\Exception $e) {
+            return new Response($e->getMessage(), 500);
         }
         return new RedirectResponse('/#redirected', 302);
     }

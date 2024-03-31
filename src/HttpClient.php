@@ -24,6 +24,8 @@ class HttpClient implements HttpClientInterface
     {
         $this->validate($method, $url);
 
+        $this->transport->init($url);
+
         $this->transport
             ->addOption(CURLOPT_URL, $url)
             ->addOption(CURLOPT_RETURNTRANSFER, true)
@@ -44,7 +46,6 @@ class HttpClient implements HttpClientInterface
         }
 
         $result = $this->transport->execute();
-
         if (!$result) {
             $erno = $this->transport->getErrno();
             $error = $this->transport->getError();

@@ -2,7 +2,6 @@
 
 namespace App;
 
-use App\Exception\TransportException;
 use Monolog\Logger;
 
 class HttpService
