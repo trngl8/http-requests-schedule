@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Unit;
+namespace App\Tests\Integration;
 
 use App\QueueHandler;
 use PHPUnit\Framework\TestCase;
