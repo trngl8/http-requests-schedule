@@ -45,6 +45,8 @@ class CurlTransport implements TransportInterface
 
     public function __destruct()
     {
-        $this->close();
+        if ($this->handler) {
+            $this->close();
+        }
     }
 }
