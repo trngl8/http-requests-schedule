@@ -19,7 +19,7 @@ class BaseController
 
     public function index(array $data): Response
     {
-        $db = new \SQLite3('../var/requests.table.db', SQLITE3_OPEN_READONLY);
+        $db = new \SQLite3('../var/requests.db', SQLITE3_OPEN_READONLY);
 
         $db->enableExceptions(true);
 
@@ -65,7 +65,7 @@ class BaseController
             return new Response($this->render('add.html.php', ['errors' => $errors]));
         }
 
-        $db = new \SQLite3('../var/requests.table.db', SQLITE3_OPEN_READWRITE);
+        $db = new \SQLite3('../var/requests.db', SQLITE3_OPEN_READWRITE);
         $db->enableExceptions(true);
         $db->exec('BEGIN');
         $statement = $db->prepare('INSERT INTO requests(method, url) VALUES(:method, :url)');
@@ -81,7 +81,7 @@ class BaseController
     public function result(Request $request): Response
     {
         $url = $request->get('url');
-        $db = new \SQLite3('../var/requests.table.db', SQLITE3_OPEN_READWRITE);
+        $db = new \SQLite3('../var/requests.db', SQLITE3_OPEN_READWRITE);
         $db->enableExceptions(true);
         $statement = $db->prepare('SELECT * FROM requests WHERE url=?');
         $statement->bindValue(1, $url);
