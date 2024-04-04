@@ -8,7 +8,7 @@ class Database
 
     public function __construct(string $name)
     {
-        $this->db = new \SQLite3(sprintf(__DIR__ . '/../var/%s.table.db', $name), SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+        $this->db = new \SQLite3(sprintf(__DIR__ . '/../var/%s.db', $name), SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
         $this->db->enableExceptions(true);
     }
 
