@@ -12,11 +12,6 @@ class Database
         $this->db->enableExceptions(true);
     }
 
-    public function prepare(string $sql): \SQLite3Stmt
-    {
-        return $this->db->prepare($sql);
-    }
-
     public function fetch(string $table, array $where): array
     {
         $condition = [];
