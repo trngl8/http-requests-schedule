@@ -2,8 +2,13 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
+use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+
+$projectDir = __DIR__.'/../';
+$dotenv = new Dotenv();
+$dotenv->load($projectDir . '.env');
 
 $request = Request::createFromGlobals();
 
