@@ -32,5 +32,11 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
+      - name: Create SQLite database and init data
+        run: |
+          mkdir -p var
+          touch var/requests.db
+          php bin/init --force
+
       - name: Run test suite
         run: composer run-script unit
