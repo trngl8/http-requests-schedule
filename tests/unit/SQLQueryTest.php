@@ -24,21 +24,24 @@ class SQLQueryTest extends TestCase
     public function testInsert(): void
     {
         $target = new SQLQuery();
-        $result = $target->insert('table', ['field' => 'value']);
-        $this->assertEquals("INSERT INTO table (field) VALUES ('value')", $result);
+        $result = $target->insert('table', [
+            'field' => 'value',
+            'name' => 'Test Tester'
+        ]);
+        $this->assertEquals("INSERT INTO table (field, name) VALUES ('value', 'Test Tester')", $result);
     }
 
     public function testUpdate(): void
     {
         $target = new SQLQuery();
         $result = $target->update('table', ['field' => 'value'], ['id' => 1]);
-        $this->assertEquals("UPDATE table SET field = 'value' WHERE id = '1'", $result);
+        $this->assertEquals("UPDATE table SET field = 'value' WHERE id = 1", $result);
     }
 
     public function testDelete(): void
     {
         $target = new SQLQuery();
         $result = $target->delete('table', ['id' => 1]);
-        $this->assertEquals("DELETE FROM table WHERE id = '1'", $result);
+        $this->assertEquals("DELETE FROM table WHERE id = 1", $result);
     }
 }

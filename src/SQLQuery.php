@@ -14,13 +14,13 @@ class SQLQuery implements SQLQueryInterface
     public function update(string $table, array $data, array $where): string
     {
         $set = implode(', ', array_map(fn($k, $v) => "$k = '$v'", array_keys($data), $data));
-        $where = implode(' AND ', array_map(fn($k, $v) => "$k = '$v'", array_keys($where), $where));
+        $where = implode(' AND ', array_map(fn($k, $v) => "$k = $v", array_keys($where), $where));
         return "UPDATE $table SET $set WHERE $where";
     }
 
     public function delete(string $table, array $where): string
     {
-        $where = implode(' AND ', array_map(fn($k, $v) => "$k = '$v'", array_keys($where), $where));
+        $where = implode(' AND ', array_map(fn($k, $v) => "$k = $v", array_keys($where), $where));
         return "DELETE FROM $table WHERE $where";
     }
 
