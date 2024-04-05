@@ -6,25 +6,19 @@ class Database
 {
     private \SQLite3 $db;
 
+    private SQLQueryInterface $sqlQuery;
+
     public function __construct(string $name)
     {
         $this->db = new \SQLite3(sprintf(__DIR__ . '/../var/%s.db', $name), SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
         $this->db->enableExceptions(true);
+        $this->sqlQuery = new SQLQuery();
     }
 
     public function fetch(string $table, array $where): array
     {
-        $condition = [];
-        foreach ($where as $key => $value) {
-            if (is_array($value)) {
-                $condition[] = "$key IN ('" . implode("', '", $value) . "')";
-            }
-            if (is_null($value)) {
-                $condition[] = "$key IS NULL";
-            }
-        }
-        $conditions = implode(' AND ', $condition);
-        $statement = $this->db->prepare("SELECT * FROM $table WHERE $conditions");
+        $sql = $this->sqlQuery->query($table, $where);
+        $statement = $this->db->prepare($sql);
         $items = $statement->execute();
 
         $result = [];
@@ -36,16 +30,14 @@ class Database
 
     public function insert(string $table, array $data): void
     {
-        $fields = implode(', ', array_keys($data));
-        $values = implode(', ', array_map(fn($v) => "'$v'", $data));
-        $this->db->query("INSERT INTO $table ($fields) VALUES ($values)");
+        $sql = $this->sqlQuery->insert($table, $data);
+        $this->db->query($sql);
     }
 
     public function update(string $table, array $data, array $where): void
     {
-        $set = implode(', ', array_map(fn($k, $v) => "$k = '$v'", array_keys($data), $data));
-        $where = implode(' AND ', array_map(fn($k, $v) => "$k = '$v'", array_keys($where), $where));
-        $this->db->query("UPDATE $table SET $set WHERE $where");
+        $sql = $this->sqlQuery->update($table, $data, $where);
+        $this->db->query($sql);
     }
 
     public function exec(string $sql): void

@@ -99,11 +99,6 @@ class BaseController
         return ob_get_clean();
     }
 
-    private function validateUrl(string $url): bool
-    {
-        return filter_var($url, FILTER_VALIDATE_URL);
-    }
-
     private function validate(Request $request): array
     {
         $errors = [];
