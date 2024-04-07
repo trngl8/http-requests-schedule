@@ -7,14 +7,22 @@ use App\Exception\ValidatorException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 class BaseController
 {
     private Request $request;
 
-    public function __construct(Request $request)
+    private Environment $twig;
+
+
+    public function __construct(Request $request, Environment $twig)
     {
         $this->request = $request;
+        $this->twig = $twig;
     }
 
     public function index(array $data): Response
@@ -34,7 +42,7 @@ class BaseController
         }
         $db->close();
 
-        return new Response($this->render('index.html.php', array_merge($data, ['jobs' => $list])), 200);
+        return new Response($this->render('index.html.twig', array_merge($data, ['jobs' => $list])), 200);
     }
 
     /**
@@ -91,12 +99,21 @@ class BaseController
         return new Response($this->render('result.html.php', ['item' => $item]));
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
     private function render(string $template, array $data = []): string
     {
-        extract($data);
-        ob_start();
-        include __DIR__ . '/../templates/' . $template;
-        return ob_get_clean();
+        if (preg_match('/(.+)\.php$/', $template, $matches)) {
+            extract($data);
+            ob_start();
+            include __DIR__ . '/../templates/' . $template;
+            return ob_get_clean();
+        }
+
+        return $this->twig->render($template, $data);
     }
 
     private function validate(Request $request): array
