@@ -64,13 +64,13 @@ class BaseController
     public function add(Request $request): Response
     {
         if ($request->getMethod() === 'GET') {
-            return new Response($this->render('add.html.php'));
+            return new Response($this->render('add.html.twig'));
         }
 
         $errors = $this->validate($request);
 
         if (count($errors) > 0) {
-            return new Response($this->render('add.html.php', ['errors' => $errors]));
+            return new Response($this->render('add.html.twig', ['errors' => $errors]));
         }
 
         $db = new \SQLite3('../var/requests.db', SQLITE3_OPEN_READWRITE);
@@ -96,7 +96,7 @@ class BaseController
         $result = $statement->execute();
         $item = $result->fetchArray(SQLITE3_ASSOC);
         $db->close();
-        return new Response($this->render('result.html.php', ['item' => $item]));
+        return new Response($this->render('result.html.twig', ['item' => $item]));
     }
 
     /**
@@ -106,13 +106,6 @@ class BaseController
      */
     private function render(string $template, array $data = []): string
     {
-        if (preg_match('/(.+)\.php$/', $template, $matches)) {
-            extract($data);
-            ob_start();
-            include __DIR__ . '/../templates/' . $template;
-            return ob_get_clean();
-        }
-
         return $this->twig->render($template, $data);
     }
 

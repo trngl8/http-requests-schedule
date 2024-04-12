@@ -25,6 +25,7 @@
         </a>
     </header>
 
+    {% block main %}
     <main>
         <h1 class="text-body-emphasis">http jobs</h1>
         <p class="fs-5 col-md-8 mb-5">Here is a queue ot the planned HTTP requests</p>
@@ -70,9 +71,9 @@
         <p class="fs-5 col-md-8">No jobs found</p>
         {% endif %}
         <a href="/add" class="btn btn-outline-primary">Add new</a>
-
-
     </main>
+    {% endblock main %}
+
     <footer class="pt-5 my-5 text-body-secondary border-top">
         Created by The Team &middot; &copy; 2024
     </footer>

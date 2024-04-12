@@ -12,7 +12,14 @@ class Database
 
     public function __construct(string $name)
     {
-        $this->db = new \SQLite3(sprintf(__DIR__ . '/../var/%s.db', $name), SQLITE3_OPEN_READWRITE);
+        $path = sprintf(__DIR__ . '/../var/%s.db', $name);
+
+        if (!file_exists($path)) {
+            $this->db = new \SQLite3($path, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+        } else {
+            $this->db = new \SQLite3($path, SQLITE3_OPEN_READWRITE);
+        }
+
         $this->db->enableExceptions(true);
         $this->sqlQuery = new SQLQuery();
     }
