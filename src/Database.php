@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Exception\DatabaseException;
+
 class Database
 {
     private \SQLite3 $db;
@@ -10,15 +12,30 @@ class Database
 
     public function __construct(string $name)
     {
-        $this->db = new \SQLite3(sprintf(__DIR__ . '/../var/%s.db', $name), SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+        $path = sprintf(__DIR__ . '/../var/%s.db', $name);
+
+        if (!file_exists($path)) {
+            $this->db = new \SQLite3($path, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+        } else {
+            $this->db = new \SQLite3($path, SQLITE3_OPEN_READWRITE);
+        }
+
         $this->db->enableExceptions(true);
         $this->sqlQuery = new SQLQuery();
     }
 
+    /**
+     * @throws DatabaseException
+     */
     public function fetch(string $table, array $where): array
     {
         $sql = $this->sqlQuery->query($table, $where);
         $statement = $this->db->prepare($sql);
+
+        if ($statement === false) {
+            throw new DatabaseException($this->db->lastErrorMsg());
+        }
+
         $items = $statement->execute();
 
         $result = [];
@@ -28,21 +45,43 @@ class Database
         return $result;
     }
 
+    /**
+     * @throws DatabaseException
+     */
     public function insert(string $table, array $data): void
     {
         $sql = $this->sqlQuery->insert($table, $data);
-        $this->db->query($sql);
+
+        $result = $this->db->query($sql);
+
+        if ($result === false) {
+            throw new DatabaseException($this->db->lastErrorMsg());
+        }
     }
 
+    /**
+     * @throws DatabaseException
+     */
     public function update(string $table, array $data, array $where): void
     {
         $sql = $this->sqlQuery->update($table, $data, $where);
-        $this->db->query($sql);
+        $result = $this->db->query($sql);
+
+        if ($result === false) {
+            throw new DatabaseException($this->db->lastErrorMsg());
+        }
     }
 
+    /**
+     * @throws DatabaseException
+     */
     public function exec(string $sql): void
     {
-        $this->db->exec($sql);
+        $result = $this->db->exec($sql);
+
+        if ($result === false) {
+            throw new DatabaseException($this->db->lastErrorMsg());
+        }
     }
 
     public function lastInsertRowID(): int
