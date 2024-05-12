@@ -4,16 +4,24 @@ namespace App;
 
 class Command
 {
-    private $choice = false;
-    public function __construct(private string $name)
+    private bool $choice = false;
+
+    private string $output = "OK. \n";
+
+    private string $prompt = 'This script %s will remove your records in the database. Are you agree? [y/n]: ';
+
+    private array $arguments;
+
+    public function __construct(private readonly string $name, array $arguments = [])
     {
+        global $argv;
+        $this->arguments = array_merge($argv, $arguments);
     }
 
     public function getArgs(): array
     {
-        global $argv;
         $result = [];
-        foreach ($argv as $arg) {
+        foreach ($this->arguments as $arg) {
             if (str_contains($arg, '=')) {
                 [$key, $value] = explode('=', $arg);
                 $result[$key] = $value;
@@ -24,24 +32,28 @@ class Command
         return $result;
     }
 
-    public function run(bool $force = false): void
+    public function choice(bool $force = false): void
     {
         if ($force || array_key_exists('--force', $this->getArgs())) {
-            $choice = 'y';
+            $value = 'y';
         } else {
-            $choice = readline(sprintf('This script %s will remove your records in the database. Are you agree? [y/n]: ', $this->name));
+            // cannot be covered by unit test
+            $value = readline(sprintf($this->prompt, $this->name));
         }
 
-        if ($choice !== 'y') {
-            echo "OK. \n";
-            exit;
+        if (!$this->choice && (empty($value) || $value === 'y') ) {
+            $this->choice = true;
+            return;
         }
 
+        $this->choice = false;
 
+        echo $this->output;
+        exit;
     }
 
-    public function getResult(): string
+    public function getChoice(): bool
     {
-        return 'y';
+        return $this->choice;
     }
 }
