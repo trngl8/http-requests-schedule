@@ -6,13 +6,19 @@ class UserInput
 {
     private array $arguments;
 
-    public function __construct(array $arguments = [])
+    private bool $force = false;
+
+    public function __construct(bool $force, array $arguments)
     {
-        global $argv;
-        $this->arguments = array_merge($argv, $arguments);
+        $this->force = $force;
+        $this->arguments = $arguments;
     }
+
     public function input(string $prompt): string
     {
+        if ($this->force) {
+            return 'y';
+        }
         $result = readline($prompt);
         if (empty($result)) {
             throw new \InvalidArgumentException('Empty input');
@@ -32,5 +38,10 @@ class UserInput
             }
         }
         return $result;
+    }
+
+    public function getForce(): bool
+    {
+        return $this->force;
     }
 }

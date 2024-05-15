@@ -5,9 +5,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Command;
 use App\Database;
-use App\UserInput;
 
-$userInput = new UserInput();
+$userInput = Command::createInput();
 $command = new Command('app:requests:show');
 $command->setUserInput($userInput);
 

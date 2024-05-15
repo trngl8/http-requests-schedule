@@ -9,7 +9,9 @@ class UserInputTest extends TestCase
 {
     public function testArgsSuccess(): void
     {
-        $target = new UserInput();
-        $this->assertGreaterThan(0, count($target->getArgs()));
+        $target = new UserInput(false, []);
+
+        $this->assertFalse($target->getForce());
+        $this->assertCount(0, $target->getArgs());
     }
 }

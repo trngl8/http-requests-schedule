@@ -4,13 +4,22 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Command;
-use App\UserInput;
 
-$userInput = new UserInput();
+$userInput = Command::createInput();
 $command = new Command('app:requests:show');
 $command->setUserInput($userInput);
 
-$command->choice();
+try {
+    $command->choice();
+} catch (InvalidArgumentException $e) {
+    echo $e->getMessage();
+    exit;
+}
+
+if (!$command->getChoice()) {
+    echo "OK. \n";
+    exit;
+}
 
 if (file_exists(__DIR__ . '/../var/requests.db')) {
     unlink(__DIR__ . '/../var/requests.db');
