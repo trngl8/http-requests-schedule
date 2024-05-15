@@ -4,25 +4,19 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Command;
+use App\Database;
 use App\UserInput;
 
 $userInput = new UserInput();
 $command = new Command('app:requests:show');
 $command->setUserInput($userInput);
 
-$command->choice();
-
-if (file_exists(__DIR__ . '/../var/requests.db')) {
-    unlink(__DIR__ . '/../var/requests.db');
-    echo "Database removed\n";
-}
-
 $db = new \SQLite3(__DIR__ . '/../var/requests.db', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 $db->enableExceptions(true);
 
-$createTablesSql = file_get_contents(__DIR__ . '/../database/init_sqlite.sql');
-$parts = explode(';', $createTablesSql);
-foreach ($parts as $part) {
-    $db->query($part);
+$database = new Database('requests');
+$result = $database->fetch('requests', ['id' => null]);
+foreach ($result as $row) {
+    echo sprintf("ID: %d, Name: %s\n", $row['id'], $row['name']);
 }
-echo "Created table requests\n";
+echo sprintf("%d requests found \n", count($result));
