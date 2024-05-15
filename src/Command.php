@@ -6,50 +6,36 @@ class Command
 {
     private bool $choice = false;
 
-    private string $output = "OK. \n";
-
     private string $prompt = 'This script %s will remove your records in the database. Are you agree? [y/n]: ';
 
-    private array $arguments;
+    private UserInput $userInput;
 
-    public function __construct(private readonly string $name, array $arguments = [])
+    public function __construct(private readonly string $name)
     {
+    }
+
+    public static function createInput(array $arguments = []): UserInput
+    {
+        $force = false;
         global $argv;
-        $this->arguments = array_merge($argv, $arguments);
+        $arguments = array_merge($argv, $arguments);
+        if (in_array('--force', $arguments)) {
+            $force = true;
+        }
+
+        return new UserInput($force, $arguments);
     }
 
-    public function getArgs(): array
+    public function setUserInput(UserInput $userInput): void
     {
-        $result = [];
-        foreach ($this->arguments as $arg) {
-            if (str_contains($arg, '=')) {
-                [$key, $value] = explode('=', $arg);
-                $result[$key] = $value;
-            } else {
-                $result[$arg] = true;
-            }
-        }
-        return $result;
+        $this->userInput = $userInput;
     }
 
-    public function choice(bool $force = false): void
+    public function choice(): void
     {
-        if ($force || array_key_exists('--force', $this->getArgs())) {
-            $value = 'y';
-        } else {
-            // cannot be covered by unit test
-            $value = readline(sprintf($this->prompt, $this->name));
-        }
+        $value = $this->userInput->getForce() ? 'y' : $this->userInput->input(sprintf($this->prompt, $this->name));
 
-        if (!$this->choice && (empty($value) || $value === 'y') ) {
-            $this->choice = true;
-            return;
-        }
-
-        $this->choice = false;
-
-        echo $this->output;
-        exit;
+        $this->choice = $value === 'y';
     }
 
     public function getChoice(): bool

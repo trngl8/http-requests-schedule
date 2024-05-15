@@ -3,28 +3,20 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-function getArgs(): array
-{
-    global $argv;
-    $result = [];
-    foreach ($argv as $arg) {
-        if (str_contains($arg, '=')) {
-            [$key, $value] = explode('=', $arg);
-            $result[$key] = $value;
-        } else {
-            $result[$arg] = true;
-        }
-    }
-    return $result;
+use App\Command;
+
+$userInput = Command::createInput();
+$command = new Command('app:requests:show');
+$command->setUserInput($userInput);
+
+try {
+    $command->choice();
+} catch (InvalidArgumentException $e) {
+    echo $e->getMessage();
+    exit;
 }
 
-if (array_key_exists('--force', getArgs())) {
-    $choice = 'y';
-} else {
-    $choice = readline('This script will remove your records in the database. Are you agree? [y/n]: ');
-}
-
-if ($choice !== 'y') {
+if (!$command->getChoice()) {
     echo "OK. \n";
     exit;
 }

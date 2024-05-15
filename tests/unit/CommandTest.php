@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit;
 
+use App\UserInput;
 use PHPUnit\Framework\TestCase;
 use App\Command;
 
@@ -9,9 +10,21 @@ class CommandTest extends TestCase
 {
     public function testChoiceDefaultSuccess(): void
     {
-        $target = new Command('app:test', ['localhost:8080']);
-        $target->choice(true);
+        $userInput = $this->createMock(UserInput::class);
+        $userInput->method('input')->willReturn('y');
+        $target = new Command('app:test');
+        $target->setUserInput($userInput);
         $result = $target->getChoice();
-        $this->assertTrue($result);
+        $this->assertFalse($result);
+    }
+
+    public function testChoiceRandom(): void
+    {
+        $userInput = $this->createMock(UserInput::class);
+        $userInput->method('input')->willReturn('sdfgsdfgdfg');
+        $target = new Command('app:test');
+        $target->setUserInput($userInput);
+        $result = $target->getChoice();
+        $this->assertFalse($result);
     }
 }
