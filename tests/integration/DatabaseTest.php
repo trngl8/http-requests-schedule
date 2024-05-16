@@ -3,6 +3,7 @@
 namespace App\Tests\Integration;
 
 use App\Database;
+use App\DataImport;
 use App\Exception\DatabaseException;
 use PHPUnit\Framework\TestCase;
 
@@ -65,5 +66,17 @@ class DatabaseTest extends TestCase
         $rec = $target->fetch('requests', ['id' => 1]);
         $this->assertCount(1, $rec);
         $this->assertEquals('POST', $rec[0]['method']);
+    }
+
+    public function testImportLinesSuccess(): void
+    {
+        $target = new DataImport();
+        $database = new Database('test');
+        $target->setDatabase($database);
+
+        $result = $target->processLines(['GET,http://example.com']);
+
+        $this->assertCount(1, $target->getErrors());
+        $this->assertEquals(0, $result);
     }
 }
