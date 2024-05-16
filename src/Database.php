@@ -52,7 +52,11 @@ class Database
     {
         $sql = $this->sqlQuery->insert($table, $data);
 
-        $result = $this->db->query($sql);
+        try {
+            $result = $this->db->query($sql);
+        } catch (\Exception $e) {
+            throw new DatabaseException($e->getMessage());
+        }
 
         if ($result === false) {
             throw new DatabaseException($this->db->lastErrorMsg());

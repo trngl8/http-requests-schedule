@@ -35,7 +35,7 @@ class SQLQuery implements SQLQueryInterface
                 $condition[] = "$key IS NULL";
             }
         }
-        $conditions = implode(' AND ', $condition);
-        return "SELECT * FROM $table WHERE $conditions";
+        $where = $condition ? 'WHERE ' . implode(' AND ', $condition) : '';
+        return "SELECT * FROM $table $where";
     }
 }
