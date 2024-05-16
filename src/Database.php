@@ -40,6 +40,8 @@ class Database
         $statement = $this->db->prepare($sql);
 
         if ($statement === false) {
+            $this->logger->error($sql);
+            $this->logger->error($this->db->lastErrorMsg());
             throw new DatabaseException($this->db->lastErrorMsg());
         }
 
@@ -66,6 +68,8 @@ class Database
         try {
             $result = $this->db->query($sql);
         } catch (\Exception $e) {
+            $this->logger->error($sql);
+            $this->logger->error($this->db->lastErrorMsg());
             throw new DatabaseException($e->getMessage());
         }
 

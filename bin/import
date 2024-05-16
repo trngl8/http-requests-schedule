@@ -5,6 +5,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Command;
 use App\Database;
+use App\DataImport;
 use App\Exception\DatabaseException;
 
 $userInput = Command::createInput();
@@ -22,16 +23,15 @@ if (!file_exists($filePath = $inputDirectory . $value . $fileExt)) {
 
 echo sprintf('File %s importing ...', $inputDirectory . $value . $fileExt). PHP_EOL;
 
+$lines = fgetcsv(fopen($filePath, 'r'));
+
 $database = new Database('requests');
 $db = new \SQLite3(__DIR__ . '/../var/requests.db', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 $db->enableExceptions(true);
 
-$lines = fgetcsv(fopen($filePath, 'r'));
-foreach ($lines as $line) {
-    $res = explode(',', $line);
-    try {
-        $database->insert('requests', $res);
-    } catch (DatabaseException $e) {
-        echo $e->getMessage() . PHP_EOL;
-    }
-}
+$import = new DataImport();
+$import->setDatabase($database);
+
+$result = $import->processLines($lines);
+
+echo $result . PHP_EOL;

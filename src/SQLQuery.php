@@ -6,9 +6,9 @@ class SQLQuery implements SQLQueryInterface
 {
     public function insert(string $table, array $data): string
     {
-        $fields = implode(', ', array_keys($data));
+        $fields = empty($data) ? '' : '('. implode(', ', array_keys($data)) . ')';
         $values = implode(', ', array_map(fn($v) => "'$v'", $data));
-        return "INSERT INTO $table ($fields) VALUES ($values)";
+        return "INSERT INTO $table $fields VALUES ($values)";
     }
 
     public function update(string $table, array $data, array $where): string
