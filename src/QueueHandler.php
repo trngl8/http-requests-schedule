@@ -40,7 +40,7 @@ class QueueHandler
         foreach ($items as $item) {
             try {
                 $result = $this->client->request($item['method'], $item['url']);
-
+                $processed[] = $item;
                 //Transaction
 
                 $this->db->exec('BEGIN');
@@ -52,7 +52,6 @@ class QueueHandler
                 ]);
                 $this->db->exec('COMMIT');
                 $this->logger->info(sprintf('Request %d processed', $item['id']));
-                $processed[] = $item;
             } catch (ValidatorException $e) {
                 $this->logger->warning($e->getMessage());
             } catch (TransportException $e) {
