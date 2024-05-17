@@ -12,12 +12,14 @@ class QueueHandlerTest extends TestCase
     public function testValidatorException(): void
     {
         $database = $this->createMock(Database::class);
-        $target = new QueueHandler($database);
         $database->method('fetch')->willReturn([
             ['id' => 1, 'method' => 'NONE', 'url' => 'http://localhost'],
             ['id' => 2, 'method' => 'GET', 'url' => '///']
         ]);
+
+        $target = new QueueHandler($database);
         $target->run();
+
         $this->assertEquals(0, $target->getProcessedCount());
     }
 
@@ -25,13 +27,15 @@ class QueueHandlerTest extends TestCase
     {
         $database = $this->createMock(Database::class);
         $logger = $this->createMock(Logger::class);
-        $target = new QueueHandler($database);
-        $target->setLogger($logger);
         $database->method('fetch')->willReturn([
             ['id' => 1, 'method' => 'GET', 'url' => 'http://localhost'],
             ['id' => 2, 'method' => 'POST', 'url' => 'http://localhost']
         ]);
+
+        $target = new QueueHandler($database);
+        $target->setLogger($logger);
         $target->run();
+
         $this->assertEquals(2, $target->getProcessedCount());
     }
 }
