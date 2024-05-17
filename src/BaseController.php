@@ -118,7 +118,7 @@ class BaseController
         if (!$request->request->get('method')) {
             $errors['method'] = 'Method is required';
         }
-        if (!in_array($request->request->get('method') , ['GET', 'POST'])) {
+        if (!in_array($request->request->get('method'), ['GET', 'POST'])) {
             $errors['method'] = 'Invalid method';
         }
         if (!filter_var($request->request->get('url'), FILTER_VALIDATE_URL)) {

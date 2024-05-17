@@ -3,9 +3,10 @@
 namespace App;
 
 use App\Exception\DatabaseException;
+
 class DataImport
 {
-    const DEFAULT_SEPARATOR = ',';
+    public const DEFAULT_SEPARATOR = ',';
     private Database $database;
 
     private array $errors = [];
