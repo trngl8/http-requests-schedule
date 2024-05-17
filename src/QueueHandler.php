@@ -12,11 +12,13 @@ class QueueHandler
 
     private $db;
 
-    public function __construct()
+    public function __construct(?Logger $logger = null, ?Database $db = null)
     {
-        $this->logger = new Logger('test');
-        $this->db = new Database('requests');
-        $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../var/logs/http.log', Level::Info));
+        $this->logger = $logger ?:
+            (new Logger('test'))
+                ->pushHandler(new StreamHandler(__DIR__ . '/../var/logs/http.log', Level::Info))
+        ;
+        $this->db = $db ?: new Database('requests');
     }
 
     public function run(): void
@@ -37,7 +39,7 @@ class QueueHandler
                     'body' => htmlspecialchars($result),
                 ]);
                 $this->db->exec('COMMIT');
-
+                $this->logger->info(sprintf('Request %d processed', $item['id']));
             } catch (\Exception $e) {
                 $this->logger->error($e->getMessage());
             }
