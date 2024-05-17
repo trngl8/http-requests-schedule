@@ -16,21 +16,27 @@ class QueueHandler
 
     private $client;
 
-    public function __construct(?Logger $logger = null, ?Database $db = null)
+    private $processed = [];
+
+    public function __construct(Database $db = null, HttpClient $client = null, Logger $logger = null)
     {
-        $this->logger = $logger ?:
-            (new Logger('test'))
-                ->pushHandler(new StreamHandler(__DIR__ . '../../var/logs/http.log', Level::Info))
-        ;
-        $this->db = $db ?: new Database('requests');
         $transport = new CurlTransport();
-        $this->client = new HttpClient($transport);
+
+        $this->logger = $logger ?: new Logger('test');
+        $this->db = $db ?: new Database('requests');
+        $this->client = $client ?: new HttpClient($transport);
+    }
+
+    public function setLogger(Logger $logger): self
+    {
+        $this->logger = $logger->pushHandler(new StreamHandler(__DIR__ . '../../var/logs/http-queue.log', Level::Info));
+        return $this;
     }
 
     public function run(): void
     {
         $items = $this->db->fetch('requests', ['finished_at' => null], );
-
+        $processed = [];
         foreach ($items as $item) {
             try {
                 $result = $this->client->request($item['method'], $item['url']);
@@ -44,11 +50,18 @@ class QueueHandler
                 ]);
                 $this->db->exec('COMMIT');
                 $this->logger->info(sprintf('Request %d processed', $item['id']));
+                $processed[] = $item;
             } catch (ValidatorException $e) {
                 $this->logger->warning($e->getMessage());
             } catch (TransportException $e) {
                 $this->logger->error($e->getMessage());
             }
         }
+        $this->processed = $processed;
+    }
+
+    public function getProcessedCount(): int
+    {
+        return count($this->processed);
     }
 }

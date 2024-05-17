@@ -29,9 +29,9 @@ class Process extends Command
 
         $this->logger = new Logger('queue');
         $this->database = new Database('requests');
-        $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../var/logs/http-queue.log', Level::Info));
 
-        $this->handler = new QueueHandler($this->logger, $this->database);
+        $this->handler = new QueueHandler($this->database);
+        $this->handler->setLogger($this->logger);
     }
 
     protected function configure(): void
