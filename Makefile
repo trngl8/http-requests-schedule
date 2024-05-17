@@ -17,6 +17,10 @@ init:
 	php bin/init
 .PHONY: init
 
+cs:
+	vendor/bin/php-cs-fixer fix src
+.PHONY: cs
+
 deploy:
 	php bin/data
 .PHONY: deploy
