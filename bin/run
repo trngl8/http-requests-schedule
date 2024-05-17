@@ -14,8 +14,8 @@ $db = new \SQLite3(__DIR__ . '/../var/requests.db', SQLITE3_OPEN_CREATE | SQLITE
 $db->enableExceptions(true);
 
 $database = new Database('requests');
-$result = $database->fetch('requests', ['id' => null]);
+$result = $database->fetch('requests', []);
 foreach ($result as $row) {
-    echo sprintf("ID: %d, Name: %s\n", $row['id'], $row['name']);
+    echo sprintf("ID: %d, Method: %s, URL: %s \n", $row['id'], $row['method'], $row['url']);
 }
 echo sprintf("%d requests found \n", count($result));

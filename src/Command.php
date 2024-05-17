@@ -42,4 +42,9 @@ class Command
     {
         return $this->choice;
     }
+
+    public function getValue($prompt): string
+    {
+        return $this->userInput->input($prompt);
+    }
 }

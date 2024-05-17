@@ -3,10 +3,15 @@
 namespace App;
 
 use App\Exception\DatabaseException;
+use Monolog\Handler\StreamHandler;
+use Monolog\Level;
+use Monolog\Logger;
 
 class Database
 {
     private \SQLite3 $db;
+
+    private Logger $logger;
 
     private SQLQueryInterface $sqlQuery;
 
@@ -22,6 +27,8 @@ class Database
 
         $this->db->enableExceptions(true);
         $this->sqlQuery = new SQLQuery();
+        $this->logger = new Logger('database');
+        $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../var/logs/database.log', Level::Info));
     }
 
     /**
@@ -33,6 +40,8 @@ class Database
         $statement = $this->db->prepare($sql);
 
         if ($statement === false) {
+            $this->logger->error($sql);
+            $this->logger->error($this->db->lastErrorMsg());
             throw new DatabaseException($this->db->lastErrorMsg());
         }
 
@@ -41,6 +50,10 @@ class Database
         $result = [];
         while ($item = $items->fetchArray(SQLITE3_ASSOC)) {
             $result[] = $item;
+        }
+
+        if (empty($result)) {
+            $this->logger->warning(sprintf("No records found for %s", $sql));
         }
         return $result;
     }
@@ -52,7 +65,13 @@ class Database
     {
         $sql = $this->sqlQuery->insert($table, $data);
 
-        $result = $this->db->query($sql);
+        try {
+            $result = $this->db->query($sql);
+        } catch (\Exception $e) {
+            $this->logger->error($sql);
+            $this->logger->error($this->db->lastErrorMsg());
+            throw new DatabaseException($e->getMessage());
+        }
 
         if ($result === false) {
             throw new DatabaseException($this->db->lastErrorMsg());
@@ -68,8 +87,13 @@ class Database
         $result = $this->db->query($sql);
 
         if ($result === false) {
+            $this->logger->error($sql);
+            $this->logger->error($this->db->lastErrorMsg());
             throw new DatabaseException($this->db->lastErrorMsg());
         }
+
+        $this->logger->info($sql);
+        $this->logger->info(sprintf("%d columns in result", $result->numColumns()));
     }
 
     /**
@@ -80,6 +104,8 @@ class Database
         $result = $this->db->exec($sql);
 
         if ($result === false) {
+            $this->logger->error($sql);
+            $this->logger->error($this->db->lastErrorMsg());
             throw new DatabaseException($this->db->lastErrorMsg());
         }
     }

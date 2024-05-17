@@ -1,0 +1,37 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use App\Command;
+use App\Database;
+use App\DataImport;
+use App\Exception\DatabaseException;
+
+$userInput = Command::createInput();
+$command = new Command('app:requests:import');
+$command->setUserInput($userInput);
+
+$inputDirectory = __DIR__ . '/../var/data/';
+$fileExt = '.csv';
+$value = $command->getValue('Enter filename: ');
+
+if (!file_exists($filePath = $inputDirectory . $value . $fileExt)) {
+    echo sprintf('File %s not found', $value . $fileExt). PHP_EOL;
+    exit(1);
+}
+
+echo sprintf('File %s importing ...', $inputDirectory . $value . $fileExt). PHP_EOL;
+
+$lines = fgetcsv(fopen($filePath, 'r'));
+
+$database = new Database('requests');
+$db = new \SQLite3(__DIR__ . '/../var/requests.db', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+$db->enableExceptions(true);
+
+$import = new DataImport();
+$import->setDatabase($database);
+
+$result = $import->processLines('requests', $lines);
+
+echo $result . PHP_EOL;
