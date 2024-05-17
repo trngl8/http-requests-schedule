@@ -15,7 +15,7 @@ class DataImportTest extends TestCase
         $database = $this->createMock(Database::class);
         $database->method('insert')->willThrowException(new DatabaseException('error'));
         $target->setDatabase($database);
-        $target->processLines(['any,data']);
+        $target->processLines('requests', ['any,data']);
         $this->assertCount(1, $target->getErrors());
     }
 
@@ -24,7 +24,7 @@ class DataImportTest extends TestCase
         $target = new DataImport();
         $database = $this->createMock(Database::class);
         $target->setDatabase($database);
-        $target->processLines(['any,data']);
+        $target->processLines('requests', ['any,data']);
         $this->assertCount(0, $target->getErrors());
     }
 }

@@ -32,6 +32,6 @@ $db->enableExceptions(true);
 $import = new DataImport();
 $import->setDatabase($database);
 
-$result = $import->processLines($lines);
+$result = $import->processLines('requests', $lines);
 
 echo $result . PHP_EOL;

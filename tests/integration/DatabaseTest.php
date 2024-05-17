@@ -68,15 +68,28 @@ class DatabaseTest extends TestCase
         $this->assertEquals('POST', $rec[0]['method']);
     }
 
-    public function testImportLinesSuccess(): void
+    public function testImportLinesError(): void
     {
         $target = new DataImport();
         $database = new Database('test');
         $target->setDatabase($database);
 
-        $result = $target->processLines(['GET,http://example.com']);
+        //process without headers
+        $result = $target->processLines('requests', ['GET,http://example.com']);
 
         $this->assertCount(1, $target->getErrors());
         $this->assertEquals(0, $result);
+    }
+
+    public function testImportLinesSuccess(): void
+    {
+        $target = new DataImport();
+        $database = new Database('test');
+        $target->setDatabase($database);
+        $target->initHeaders('requests', ['method', 'url']);
+        $result = $target->processLines('requests', ['GET,http://example.com']);
+
+        $this->assertCount(0, $target->getErrors());
+        $this->assertEquals(1, $result);
     }
 }
