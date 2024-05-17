@@ -1,6 +1,8 @@
 .idea
 .phpunit.result.cache
 
+phpunit.xml
+
 /.env.local
 /.env.*.local
 
