@@ -35,11 +35,13 @@ class QueueHandler
 
     public function run(): void
     {
-        $items = $this->db->fetch('requests', ['finished_at' => null], );
+        $items = $this->db->fetch('requests', ['finished_at' => null]);
         $processed = [];
         foreach ($items as $item) {
             try {
                 $result = $this->client->request($item['method'], $item['url']);
+
+                //Transaction
 
                 $this->db->exec('BEGIN');
                 $this->db->update('requests', ['finished_at' => date('Y-m-d H:i:s')], ['id' => $item['id']]);
