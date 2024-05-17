@@ -19,6 +19,7 @@ class Export extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $output->writeln('Exporting csv data...');
         return Command::SUCCESS;
     }
 }
