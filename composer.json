@@ -4,6 +4,7 @@
         "ext-curl": "*",
         "ext-sqlite3": "*",
         "ext-readline": "*",
+        "ext-dom": "*",
         "monolog/monolog": "^3.5",
         "symfony/http-foundation": "^7.0",
         "symfony/dotenv": "^7.0",

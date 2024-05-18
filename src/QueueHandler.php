@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Exception\TransportException;
+use App\Exception\ValidatorException;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
@@ -12,35 +14,75 @@ class QueueHandler
 
     private $db;
 
-    public function __construct()
+    private $client;
+
+    private $processed = [];
+
+    private $uris = [];
+
+    public function __construct(Database $db = null, HttpClient $client = null, Logger $logger = null)
     {
-        $this->logger = new Logger('test');
-        $this->db = new Database('requests');
-        $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../var/logs/http.log', Level::Info));
+        $transport = new CurlTransport();
+
+        $this->logger = $logger ?: new Logger('test');
+        $this->db = $db ?: new Database('requests');
+        $this->client = $client ?: new HttpClient($transport);
+    }
+
+    public function setLogger(Logger $logger): self
+    {
+        $this->logger = $logger->pushHandler(new StreamHandler(__DIR__ . '../../var/logs/http-queue.log', Level::Info));
+        return $this;
     }
 
     public function run(): void
     {
-        $items = $this->db->fetch('requests', ['finished_at' => null], );
-
+        $items = $this->db->fetch('requests', ['finished_at' => null]);
+        $processed = $uris = [];
         foreach ($items as $item) {
-            $transport = new CurlTransport();
-            $client = new HttpClient($transport);
             try {
-                $result = $client->request($item['method'], $item['url']);
+                $result = $this->client->request($item['method'], $item['url']);
+
+                if (empty($result)) {
+                    throw new TransportException('Curl transport error');
+                }
+                //Transaction
 
                 $this->db->exec('BEGIN');
                 $this->db->update('requests', ['finished_at' => date('Y-m-d H:i:s')], ['id' => $item['id']]);
                 $this->db->insert('responses', [
                     'request_id' => $item['id'],
-                    'code' => $client->getStatusCode(),
+                    'code' => $this->client->getStatusCode(),
                     'body' => htmlspecialchars($result),
                 ]);
                 $this->db->exec('COMMIT');
+                $processed[] = $item;
 
-            } catch (\Exception $e) {
+                $doc = new \DOMDocument();
+                $doc->loadHTML($result);
+                $xpath = new \DOMXPath($doc);
+                $nodes = $xpath->query('//a');
+                foreach ($nodes as $node) {
+                    $uris[] = $node->getAttribute('href');
+                }
+                $this->logger->info(sprintf('Request %d processed', $item['id']));
+            } catch (ValidatorException $e) {
+                $this->logger->warning($e->getMessage());
+            } catch (TransportException $e) {
                 $this->logger->error($e->getMessage());
             }
         }
+        $this->processed = $processed;
+        $this->uris = $uris;
+    }
+
+    public function getProcessedCount(): int
+    {
+        return count($this->processed);
+    }
+
+    public function getUris(): array
+    {
+        return $this->uris;
     }
 }
