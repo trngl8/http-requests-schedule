@@ -18,6 +18,8 @@ class QueueHandler
 
     private $processed = [];
 
+    private $uris = [];
+
     public function __construct(Database $db = null, HttpClient $client = null, Logger $logger = null)
     {
         $transport = new CurlTransport();
@@ -36,11 +38,14 @@ class QueueHandler
     public function run(): void
     {
         $items = $this->db->fetch('requests', ['finished_at' => null]);
-        $processed = [];
+        $processed = $uris = [];
         foreach ($items as $item) {
             try {
                 $result = $this->client->request($item['method'], $item['url']);
 
+                if (empty($result)) {
+                    throw new TransportException('Curl transport error');
+                }
                 //Transaction
 
                 $this->db->exec('BEGIN');
@@ -52,6 +57,14 @@ class QueueHandler
                 ]);
                 $this->db->exec('COMMIT');
                 $processed[] = $item;
+
+                $doc = new \DOMDocument();
+                $doc->loadHTML($result);
+                $xpath = new \DOMXPath($doc);
+                $nodes = $xpath->query('//a');
+                foreach ($nodes as $node) {
+                    $uris[] = $node->getAttribute('href');
+                }
                 $this->logger->info(sprintf('Request %d processed', $item['id']));
             } catch (ValidatorException $e) {
                 $this->logger->warning($e->getMessage());
@@ -60,10 +73,16 @@ class QueueHandler
             }
         }
         $this->processed = $processed;
+        $this->uris = $uris;
     }
 
     public function getProcessedCount(): int
     {
         return count($this->processed);
+    }
+
+    public function getUris(): array
+    {
+        return $this->uris;
     }
 }
