@@ -31,6 +31,7 @@
     },
     "scripts": {
         "unit": "XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit --coverage-text",
+        "integration": "XDEBUG_MODE=coverage vendor/bin/phpunit tests/integration --coverage-text",
         "e2e": "vendor/bin/phpunit tests/e2e"
     }
 }
