@@ -27,7 +27,7 @@ class HttpService
         $result = $this->client->request('GET', $url);
         $this->response = new ResponseData($this->client->getStatusCode(), $result);
         $this->logger->info(sprintf('GET %s : %d', $url, $this->client->getStatusCode()));
-        $this->repository->save($url, 'GET', $this->client->getStatusCode());
+        $this->repository->save('GET', $url, $this->client->getStatusCode());
     }
 
     public function post(string $url, array $data): void
@@ -35,7 +35,7 @@ class HttpService
         $result = $this->client->request('POST', $url, $data);
         $this->response = new ResponseData($this->client->getStatusCode(), $result);
         $this->logger->info(sprintf('POST %s : %d', $url, $this->client->getStatusCode()), $data);
-        $this->repository->save($url, 'POST', $this->client->getStatusCode());
+        $this->repository->save('POST', $url, $this->client->getStatusCode());
     }
 
     public function request(string $method, string $url, array $data): void
