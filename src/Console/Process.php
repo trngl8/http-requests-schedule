@@ -69,14 +69,16 @@ class Process extends Command
             case 'import':
                 $result = $io->askQuestion(new Question('Enter filename: '));
                 $this->handler->import(__DIR__ . '/../../var/data/' . $result);
+                $io->info(sprintf('File %s processed', $result));
                 break;
             case 'run':
+                $this->handler->init();
                 $io->progressStart(count($this->handler->getItems()));
 
                 $i = 0;
-                $this->handler->start();
                 while ($next = $this->handler->getNext()) {
                     try {
+                        var_dump($next);
                         $this->handler->process($next);
                         $i++;
                     } catch (\Exception $e) {
@@ -91,12 +93,13 @@ class Process extends Command
                 $io->info(sprintf('Processed %d requests', $i));
                 break;
             case 'delete':
-                $output->writeln('Deleting data... ');
+                $io->warning('Deleting data requests... ');
                 $this->database->exec('DELETE FROM requests');
+                $io->warning('Deleting data responses... ');
                 $this->database->exec('DELETE FROM responses');
                 break;
             default:
-                $output->writeln('Unknown action');
+                $io->error('Unknown action');
         }
 
         return Command::SUCCESS;
