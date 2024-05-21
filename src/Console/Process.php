@@ -4,13 +4,12 @@ namespace App\Console;
 
 use App\Database;
 use App\QueueHandler;
-use Monolog\Handler\StreamHandler;
-use Monolog\Level;
 use Monolog\Logger;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class Process extends Command
@@ -39,8 +38,7 @@ class Process extends Command
         $this
             ->setDescription('Process data')
             ->setHelp('This command allows you to process data...')
-            ->addArgument('action', InputArgument::REQUIRED, 'Any process action');
-
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -50,23 +48,47 @@ class Process extends Command
         $result = $this->database->fetch('requests', []);
         $headers = ['ID', 'Method', 'URL', 'Headers', 'Body', 'Created at', 'Ran at', 'Finished at'];
 
-        $action = $input->getArgument('action');
+        $helper = $this->getHelper('question');
+        $question = new ChoiceQuestion(
+            'Please select an action',
+            ['list', 'import', 'run', 'delete'],
+            0
+        );
+        $question->setErrorMessage('Action %s is invalid.');
+
+        $action = $helper->ask($input, $output, $question);
 
         switch ($action) {
-            case 'show':
+            case 'list':
                 $io->title('Books');
                 $io->table(
                     $headers,
                     $result
                 );
                 break;
+            case 'import':
+                $result = $io->askQuestion(new Question('Enter filename: '));
+                $this->handler->import(__DIR__ . '/../../var/data/' . $result);
+                break;
             case 'run':
-                $output->writeln('<info>Processing data... </info>');
+                $io->progressStart(count($this->handler->getItems()));
 
-                $this->handler->run();
+                $i = 0;
+                $this->handler->start();
+                while ($next = $this->handler->getNext()) {
+                    try {
+                        $this->handler->process($next);
+                        $i++;
+                    } catch (\Exception $e) {
+                        $output->writeln('<error>'.$e->getMessage().'</error>');
+                        $this->logger->error($e->getMessage());
+                        sleep(1);
+                    }
+                    $io->progressAdvance();
+                }
 
-                $output->writeln('<info>Processed </info>');
-
+                $io->progressFinish();
+                $io->info(sprintf('Processed %d requests', $i));
                 break;
             case 'delete':
                 $output->writeln('Deleting data... ');
