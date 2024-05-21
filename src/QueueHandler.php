@@ -76,6 +76,70 @@ class QueueHandler
         $this->uris = $uris;
     }
 
+    public function getNext()
+    {
+        return array_pop($this->uris);
+    }
+
+    public function getItems(): array
+    {
+        return $this->uris;
+    }
+
+    public function start(): void
+    {
+        $this->uris =  $this->uris ?? $this->db->fetch('requests', ['finished_at' => null]);
+    }
+
+    public function process(string $uri)
+    {
+        try {
+            $result = $this->client->request('GET', $uri);
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage(). ' ' . $uri);
+        }
+
+
+        if (empty($result)) {
+            throw new TransportException('Curl transport error');
+        }
+
+        $doc = new \DOMDocument();
+        $doc->loadHTML($result);
+        $xpath = new \DOMXPath($doc);
+        $nodes = $xpath->query('//a');
+        foreach ($nodes as $node) {
+            $this->uris[] = $node->getAttribute('href');
+        }
+    }
+
+    public function import(string $filename): void
+    {
+        if (!file_exists($filename)) {
+            throw new \Exception(sprintf('File %s not found', $filename));
+        }
+        $data = file_get_contents($filename);
+        $lines = explode("\n", $data);
+        $first = array_shift($lines);
+        $headers = explode(',', $first);
+        if (count($headers) !== 1) {
+            throw new \Exception('Invalid file format');
+        }
+
+        foreach ($lines as $line) {
+            if (empty($line)) {
+                continue;
+            }
+            $parts = explode(',', $line);
+            $item = array_combine($headers, $parts);
+            $defaultData = [
+                'method' => 'GET',
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+            $this->db->insert('requests', array_merge($defaultData, $item));
+        }
+    }
+
     public function getProcessedCount(): int
     {
         return count($this->processed);
