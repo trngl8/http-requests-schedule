@@ -21,7 +21,10 @@ class Kernel
 
         $projectDir = __DIR__.'/../';
         $dotenv = new Dotenv();
-        $dotenv->load($projectDir . '.env', $projectDir . '.env.local');
+        $dotenv->load($projectDir . '.env');
+        if (file_exists($projectDir . '.env.local')) {
+            $dotenv->load($projectDir . '.env.local');
+        }
 
         if ($_ENV['APP_DEBUG'] === 'true') {
             $this->debug = true;
