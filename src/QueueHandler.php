@@ -20,6 +20,8 @@ class QueueHandler
 
     private $uris = [];
 
+    private $items = [];
+
     public function __construct(Database $db = null, HttpClient $client = null, Logger $logger = null)
     {
         $transport = new CurlTransport();
@@ -35,11 +37,24 @@ class QueueHandler
         return $this;
     }
 
+    public function init(): void
+    {
+        $this->items = $this->db->fetch('requests', ['finished_at' => null]);
+        foreach ($this->items as $item) {
+            $this->uris[] = $item['url'];
+        }
+    }
+
+    public function setUris(array $uris): void
+    {
+        $this->uris = $uris;
+    }
+
     public function run(): void
     {
-        $items = $this->db->fetch('requests', ['finished_at' => null]);
+        $this->init();
         $processed = $uris = [];
-        foreach ($items as $item) {
+        foreach ($this->items as $item) {
             try {
                 $result = $this->client->request($item['method'], $item['url']);
 
@@ -84,11 +99,6 @@ class QueueHandler
     public function getItems(): array
     {
         return $this->uris;
-    }
-
-    public function start(): void
-    {
-        $this->uris =  $this->uris ?? $this->db->fetch('requests', ['finished_at' => null]);
     }
 
     public function process(string $uri)
