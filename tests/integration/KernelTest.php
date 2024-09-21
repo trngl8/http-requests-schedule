@@ -12,6 +12,7 @@ class KernelTest extends TestCase
     {
         $kernel = new Kernel();
         $this->assertInstanceOf(TemplatesEngine::class, $kernel->getTemplateEngine());
+        $this->assertEquals(0, $kernel->getDatabase()->lastInsertRowID());
         $this->assertStringEndsWith('/src/../', $kernel->getSourceFolder());
     }
 }

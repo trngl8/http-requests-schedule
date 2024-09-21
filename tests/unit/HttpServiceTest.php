@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Integration;
+namespace App\Tests\Unit;
 
 use App\DataRepository;
 use App\HttpClientInterface;

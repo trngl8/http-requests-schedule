@@ -12,6 +12,8 @@ class Kernel
 
     private Environment $twig;
 
+    private Database $database;
+
     private bool $debug;
 
     public function __construct(bool $debug = false)
@@ -24,6 +26,12 @@ class Kernel
         $dotenv->load($projectDir . '.env');
         if (file_exists($projectDir . '.env.local')) {
             $dotenv->load($projectDir . '.env.local');
+        }
+
+        if ($_ENV['DATABASE_DSN']) {
+            $this->database = new Database($_ENV['DATABASE_DSN']);
+        } else {
+            $this->database = new Database('requests.db');
         }
 
         if ($_ENV['APP_DEBUG'] === 'true') {
@@ -39,6 +47,11 @@ class Kernel
     public function getSourceFolder(): string
     {
         return $this->sourceFolder;
+    }
+
+    public function getDatabase(): Database
+    {
+        return $this->database;
     }
 
     public function getTemplateEngine(): Environment
