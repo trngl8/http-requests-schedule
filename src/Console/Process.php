@@ -97,6 +97,7 @@ class Process extends Command
                 $this->database->exec('DELETE FROM requests');
                 $io->warning('Deleting data responses... ');
                 $this->database->exec('DELETE FROM responses');
+                $io->info(sprintf('Deleted successfully'));
                 break;
             default:
                 $io->error('Unknown action');
