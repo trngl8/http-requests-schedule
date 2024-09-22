@@ -9,12 +9,15 @@ use PHPUnit\Framework\TestCase;
 
 class DatabaseTest extends TestCase
 {
+    const DB_PATH = __DIR__ . '/../../var/';
+
+    const DB_NAME = 'localhost.db';
+
     private $db;
 
     public function setUp(): void
     {
-        $name = 'test';
-        $dbPath = sprintf(__DIR__ . '/../../var/%s.db', $name);
+        $dbPath = self::DB_PATH . DIRECTORY_SEPARATOR . self::DB_NAME;
         if (file_exists($dbPath)) {
             unlink($dbPath);
         }
@@ -28,28 +31,28 @@ class DatabaseTest extends TestCase
 
     public function testDatabaseExec(): void
     {
-        $target = new Database('test');
+        $target = new Database(self::DB_NAME);
         $target->exec('DROP TABLE IF EXISTS not_exists');
         $this->assertTrue(true);
     }
 
     public function testDatabase(): void
     {
-        $target = new Database('test');
+        $target = new Database(self::DB_NAME);
         $result = $target->fetch('requests',  []);
         $this->assertEmpty($result);
     }
 
     public function testDatabaseInsertException(): void
     {
-        $target = new Database('test');
+        $target = new Database(self::DB_NAME);
         $this->expectException(DatabaseException::class);
         $target->insert('requests',  ['id' => 1]);
     }
 
     public function testDatabaseInsertSuccess(): void
     {
-        $target = new Database('test');
+        $target = new Database(self::DB_NAME);
         $target->insert('requests',  ['method' => 'GET', 'url' => 'http://example.com']);
         $ID = $target->lastInsertRowID();
         $this->assertEquals(1, $ID);
@@ -60,7 +63,7 @@ class DatabaseTest extends TestCase
 
     public function testDatabaseUpdateSuccess(): void
     {
-        $target = new Database('test');
+        $target = new Database(self::DB_NAME);
         $target->insert('requests',  ['method' => 'GET', 'url' => 'http://example.com']);
         $target->update('requests',  ['method' => 'POST', 'url' => 'http://example.com'], ['id' => 1]);
         $rec = $target->fetch('requests', ['id' => 1]);
@@ -71,7 +74,7 @@ class DatabaseTest extends TestCase
     public function testImportLinesError(): void
     {
         $target = new DataImport();
-        $database = new Database('test');
+        $database = new Database(self::DB_NAME);
         $target->setDatabase($database);
 
         //process without headers
@@ -84,7 +87,7 @@ class DatabaseTest extends TestCase
     public function testImportLinesSuccess(): void
     {
         $target = new DataImport();
-        $database = new Database('test');
+        $database = new Database(self::DB_NAME);
         $target->setDatabase($database);
         $target->initHeaders('requests', ['method', 'url']);
         $result = $target->processLines('requests', ['GET,http://example.com']);

@@ -27,7 +27,7 @@ class Info extends Command
         parent::__construct($name);
 
         $this->logger = new Logger('queue');
-        $this->database = new Database('requests');
+        $this->database = new Database('localhost.db');
 
         $this->handler = new QueueHandler($this->database);
         $this->handler->setLogger($this->logger);

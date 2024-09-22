@@ -2,8 +2,12 @@
 
 namespace App\Controller;
 
+use App\CurlTransport;
+use App\Database;
 use App\Exception\TransportException;
 use App\Exception\ValidatorException;
+use App\Factory\Logger;
+use App\HttpClient;
 use App\InputValidator;
 use App\QueueHandler;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -14,7 +18,7 @@ class IndexController extends BaseController
 {
     public function index(): Response
     {
-        $db = new \SQLite3('../var/requests.db', SQLITE3_OPEN_READONLY);
+        $db = new \SQLite3('../var/localhost.db', SQLITE3_OPEN_READONLY);
 
         $db->enableExceptions(true);
 
@@ -45,7 +49,7 @@ class IndexController extends BaseController
             return new Response($this->render('add.html.twig', ['errors' => $errors]));
         }
 
-        $db = new \SQLite3('../var/requests.db', SQLITE3_OPEN_READWRITE);
+        $db = new \SQLite3('../var/localhost.db', SQLITE3_OPEN_READWRITE);
         $db->enableExceptions(true);
         $db->exec('BEGIN');
         $statement = $db->prepare('INSERT INTO requests(method, url) VALUES(:method, :url)');
@@ -65,8 +69,13 @@ class IndexController extends BaseController
     public function run(Request $request): Response
     {
         //TODO: validate $request if exists
+
+        $db = new Database('localhost.db');
+        $transport = new CurlTransport();
+        $logger = Logger::create('queue');
+        $httpClient = new HttpClient($transport);
         try {
-            $handler = new QueueHandler();
+            $handler = new QueueHandler($db, $httpClient, $logger);
             $handler->run();
         } catch (\Exception $e) {
             return new Response($e->getMessage(), 500);
@@ -77,7 +86,7 @@ class IndexController extends BaseController
     public function result(Request $request): Response
     {
         $url = $request->get('url');
-        $db = new \SQLite3('../var/requests.db', SQLITE3_OPEN_READWRITE);
+        $db = new \SQLite3('../var/localhost.db', SQLITE3_OPEN_READWRITE);
         $db->enableExceptions(true);
         $statement = $db->prepare('SELECT * FROM requests WHERE url=?');
         $statement->bindValue(1, $url);

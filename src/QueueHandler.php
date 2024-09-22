@@ -27,7 +27,7 @@ class QueueHandler
         $transport = new CurlTransport();
 
         $this->logger = $logger ?: new Logger('test');
-        $this->db = $db ?: new Database('requests');
+        $this->db = $db ?: new Database('localhost.db');
         $this->client = $client ?: new HttpClient($transport);
     }
 

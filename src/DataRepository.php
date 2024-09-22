@@ -6,7 +6,7 @@ class DataRepository
 {
     public function save(string $method, string $url, int $code, string $body = ''): void
     {
-        $db = new Database('requests');
+        $db = new Database('localhost.db');
 
         $db->exec('BEGIN');
         $db->insert('requests', [

@@ -28,11 +28,15 @@ class Kernel
             $dotenv->load($projectDir . '.env.local');
         }
 
-        if ($_ENV['DATABASE_DSN']) {
-            $this->database = new Database($_ENV['DATABASE_DSN']);
-        } else {
-            $this->database = new Database('requests.db');
+        if (!array_key_exists('APP_DOMAIN', $_ENV)) {
+            throw new \Exception('APP_DOMAIN is not defined in .env file');
         }
+
+        if (!array_key_exists('DATABASE_DSN', $_ENV)) {
+            $_ENV['DATABASE_DSN'] = sprintf('%s.db', $_ENV['APP_DOMAIN']);
+        }
+
+        $this->database = new Database($_ENV['DATABASE_DSN']);
 
         if ($_ENV['APP_DEBUG'] === 'true') {
             $this->debug = true;
