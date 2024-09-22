@@ -25,7 +25,7 @@ echo sprintf('File %s importing ...', $inputDirectory . $value . $fileExt). PHP_
 
 $lines = fgetcsv(fopen($filePath, 'r'));
 
-$database = new Database('requests');
+$database = new Database('localhost.db');
 $db = new \SQLite3(__DIR__ . '/../var/requests.db', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 $db->enableExceptions(true);
 

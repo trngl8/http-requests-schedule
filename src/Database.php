@@ -17,7 +17,7 @@ class Database
 
     public function __construct(string $name)
     {
-        $path = sprintf(__DIR__ . '/../var/%s.db', $name);
+        $path = sprintf(__DIR__ . '/../var/%s', $name);
 
         if (!file_exists($path)) {
             $this->db = new \SQLite3($path, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);

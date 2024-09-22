@@ -21,12 +21,12 @@ if (!$command->getChoice()) {
     exit;
 }
 
-if (file_exists(__DIR__ . '/../var/requests.db')) {
-    unlink(__DIR__ . '/../var/requests.db');
+if (file_exists(__DIR__ . '/../var/localhost.db')) {
+    unlink(__DIR__ . '/../var/localhost.db');
     echo "Database removed\n";
 }
 
-$db = new \SQLite3(__DIR__ . '/../var/requests.db', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+$db = new \SQLite3(__DIR__ . '/../var/localhost.db', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 $db->enableExceptions(true);
 
 $createTablesSql = file_get_contents(__DIR__ . '/../database/init_sqlite.sql');
