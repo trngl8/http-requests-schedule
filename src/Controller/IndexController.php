@@ -3,8 +3,6 @@
 namespace App\Controller;
 
 use App\CurlTransport;
-use App\Exception\TransportException;
-use App\Exception\ValidatorException;
 use App\Factory\Logger;
 use App\HttpClient;
 use App\InputValidator;
@@ -43,14 +41,8 @@ class IndexController extends BaseController
         return new RedirectResponse('/#added', 302);
     }
 
-    /**
-     * @throws TransportException
-     * @throws ValidatorException
-     */
     public function run(Request $request): Response
     {
-        //TODO: validate $request if exists
-
         $transport = new CurlTransport();
         $logger = Logger::create('queue');
         $httpClient = new HttpClient($transport);
@@ -68,6 +60,7 @@ class IndexController extends BaseController
         $url = $request->get('url');
 
         $item = $this->database->fetch('requests', ['url' => $url]);
+
         return new Response($this->render('result.html.twig', ['item' => $item]));
     }
 }
