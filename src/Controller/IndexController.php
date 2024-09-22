@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\CurlTransport;
-use App\Database;
 use App\Exception\TransportException;
 use App\Exception\ValidatorException;
 use App\Factory\Logger;
@@ -18,20 +17,7 @@ class IndexController extends BaseController
 {
     public function index(Request $request): Response
     {
-        $db = new \SQLite3('../var/localhost.db', SQLITE3_OPEN_READONLY);
-
-        $db->enableExceptions(true);
-
-        $statement = $db->prepare('SELECT req.*, res.code, res.body FROM requests req LEFT JOIN responses res ON req.id = res.request_id WHERE req.method = ?');
-        $statement->bindValue(1, 'GET');
-
-        $list = [];
-        $messages = $statement->execute();
-
-        while ($item = $messages->fetchArray(SQLITE3_ASSOC)) {
-            $list[] = $item;
-        }
-        $db->close();
+        $list = $this->database->fetch('requests', ['method' => 'GET']);
 
         return new Response($this->render('index.html.twig', ['jobs' => $list]), 200);
     }
@@ -49,15 +35,10 @@ class IndexController extends BaseController
             return new Response($this->render('add.html.twig', ['errors' => $errors]));
         }
 
-        $db = new \SQLite3('../var/localhost.db', SQLITE3_OPEN_READWRITE);
-        $db->enableExceptions(true);
-        $db->exec('BEGIN');
-        $statement = $db->prepare('INSERT INTO requests(method, url) VALUES(:method, :url)');
-        $statement->bindValue(':url', $request->request->get('url'));
-        $statement->bindValue(':method', $request->request->get('method'));
-        $statement->execute();
-        $db->exec('COMMIT');
-        $db->close();
+        $this->database->insert('requests', [
+            'method' => $request->request->get('method'),
+            'url' => $request->request->get('url'),
+        ]);
 
         return new RedirectResponse('/#added', 302);
     }
@@ -70,12 +51,11 @@ class IndexController extends BaseController
     {
         //TODO: validate $request if exists
 
-        $db = new Database('localhost.db');
         $transport = new CurlTransport();
         $logger = Logger::create('queue');
         $httpClient = new HttpClient($transport);
         try {
-            $handler = new QueueHandler($db, $httpClient, $logger);
+            $handler = new QueueHandler($this->database, $httpClient, $logger);
             $handler->run();
         } catch (\Exception $e) {
             return new Response($e->getMessage(), 500);
@@ -86,13 +66,8 @@ class IndexController extends BaseController
     public function result(Request $request): Response
     {
         $url = $request->get('url');
-        $db = new \SQLite3('../var/localhost.db', SQLITE3_OPEN_READWRITE);
-        $db->enableExceptions(true);
-        $statement = $db->prepare('SELECT * FROM requests WHERE url=?');
-        $statement->bindValue(1, $url);
-        $result = $statement->execute();
-        $item = $result->fetchArray(SQLITE3_ASSOC);
-        $db->close();
+
+        $item = $this->database->fetch('requests', ['url' => $url]);
         return new Response($this->render('result.html.twig', ['item' => $item]));
     }
 }

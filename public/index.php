@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 $kernel = new App\Kernel();
 $twig = $kernel->getTemplateEngine();
+$database = $kernel->getDatabase();
 
 $request = Request::createFromGlobals();
 
@@ -40,7 +41,7 @@ $attributes = $matcher->match($request->getPathInfo());
 
 try {
     $request->attributes->add($attributes);
-    $controller = new $attributes['_controller']($twig);
+    $controller = new $attributes['_controller']($twig, $database);
 
     $response = call_user_func_array([$controller, $attributes['_method']], [$request]);
 } catch (ResourceNotFoundException $exception) {
