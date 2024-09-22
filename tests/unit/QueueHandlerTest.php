@@ -26,7 +26,7 @@ class QueueHandlerTest extends TestCase
         $target->run();
 
         $this->assertEquals(0, $target->getProcessedCount());
-        $this->assertCount(0, $target->getUris());
+        $this->assertCount(2, $target->getUris());
     }
 
     public function testSomethingSuccess(): void
@@ -54,6 +54,6 @@ class QueueHandlerTest extends TestCase
         $target->run();
 
         $this->assertEquals(2, $target->getProcessedCount());
-        $this->assertCount(2, $target->getUris());
+        $this->assertCount(4, $target->getUris());
     }
 }

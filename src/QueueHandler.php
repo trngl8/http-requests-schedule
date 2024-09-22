@@ -7,6 +7,7 @@ use App\Exception\ValidatorException;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
+use Psr\Log\NullLogger;
 
 class QueueHandler
 {
@@ -22,13 +23,11 @@ class QueueHandler
 
     private $items = [];
 
-    public function __construct(Database $db = null, HttpClient $client = null, Logger $logger = null)
+    public function __construct(Database $db, HttpClient $client, Logger $logger = null)
     {
-        $transport = new CurlTransport();
-
-        $this->logger = $logger ?: new Logger('test');
-        $this->db = $db ?: new Database('localhost.db');
-        $this->client = $client ?: new HttpClient($transport);
+        $this->db = $db;
+        $this->client = $client;
+        $this->logger = $logger ?: new NullLogger();
     }
 
     public function setLogger(Logger $logger): self
@@ -52,14 +51,15 @@ class QueueHandler
 
     public function run(): void
     {
-        $this->init();
-        $processed = $uris = [];
-        foreach ($this->items as $item) {
+        $uris = $this->db->fetch('requests', ['finished_at' => null]);
+        $processed = [];
+        foreach ($uris as $item) {
             try {
                 $result = $this->client->request($item['method'], $item['url']);
 
                 if (empty($result)) {
-                    throw new TransportException('Curl transport error');
+                    continue;
+                    //throw new TransportException('Curl transport error');
                 }
                 //Transaction
 

@@ -63,4 +63,25 @@ class IndexController extends BaseController
 
         return new Response($this->render('result.html.twig', ['item' => $item]));
     }
+
+    public function delete(Request $request): Response
+    {
+        $this->database->delete('requests', ['id' => $request->get('id')]);
+
+        return new RedirectResponse('/#deleted', 302);
+    }
+
+    public function show(Request $request): Response
+    {
+        $item = $this->database->fetch('requests', ['id' => $request->get('id')]);
+
+        return new Response($this->render('show.html.twig', ['item' => $item]));
+    }
+
+    public function edit(Request $request): Response
+    {
+        $item = $this->database->fetch('requests', ['id' => $request->get('id')]);
+
+        return new Response($this->render('edit.html.twig', ['item' => $item]));
+    }
 }
