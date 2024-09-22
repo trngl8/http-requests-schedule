@@ -34,20 +34,33 @@ $routes->add('app_result', new Route('/result', [
     '_method' => 'result'
 ]));
 
+$routes->add('app_show', new Route('/res/{id}/show', [
+    '_controller' => App\Controller\IndexController::class,
+    '_method' => 'show'
+]));
+
+$routes->add('app_edit', new Route('/res/{id}/edit', [
+    '_controller' => App\Controller\IndexController::class,
+    '_method' => 'edit'
+]));
+
 $context = new RequestContext();
 $matcher = new UrlMatcher($routes, $context);
 
-$attributes = $matcher->match($request->getPathInfo());
-
 try {
-    $request->attributes->add($attributes);
+    $attributes = $matcher->match($request->getPathInfo());
+    //$request->attributes->add($attributes);
     $controller = new $attributes['_controller']($twig, $database);
+
+    if (!method_exists($controller, $attributes['_method'])) {
+        throw new ResourceNotFoundException(sprintf('Method %s not found', $attributes['_method']));
+    }
 
     $response = call_user_func_array([$controller, $attributes['_method']], [$request]);
 } catch (ResourceNotFoundException $exception) {
-    $response = new Response('Not Found', 404);
+    $response = new Response($exception->getMessage(), Response::HTTP_NOT_FOUND);
 } catch (\Exception $exception) {
-    $response = new Response('An error occurred', 500);
+    $response = new Response($exception->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
 }
 
 $response->send();

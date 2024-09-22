@@ -114,4 +114,19 @@ class Database
     {
         return $this->db->lastInsertRowID();
     }
+
+    public function delete(string $table, array $where): void
+    {
+        $sql = $this->sqlQuery->delete($table, $where);
+        $result = $this->db->query($sql);
+
+        if ($result === false) {
+            $this->logger->error($sql);
+            $this->logger->error($this->db->lastErrorMsg());
+            throw new DatabaseException($this->db->lastErrorMsg());
+        }
+
+        $this->logger->info($sql);
+        $this->logger->info(sprintf("%d columns in result", $result->numColumns()));
+    }
 }

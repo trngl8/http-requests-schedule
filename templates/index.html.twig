@@ -34,17 +34,12 @@
         <h1 class="text-body-emphasis">http jobs</h1>
         <p class="fs-5 col-md-8 mb-5">Here is a queue ot the planned HTTP requests</p>
         {% if jobs|length > 0 %}
-        <form method="post" action="/run" class="mb-1">
-            <input type="hidden" id="action" name="action" value="run">
-            <button type="submit" class="btn btn-primary btn-lg px-4">RUN</button>
-        </form>
         <table class="table" aria-describedby="http-jobs">
             <thead>
             <tr>
-                <th scope="col">Method</th>
                 <th scope="col">URL</th>
-                <th scope="col">Created At</th>
-                <th scope="col">Code</th>
+                <th scope="col">Method</th>
+                <th scope="col">Status</th>
                 <th scope="col">Actions</th>
             </tr>
             </thead>
@@ -55,18 +50,20 @@
                 set colors = {200: 'success', 404: 'secondary', 500: 'warning'}
             %}
             <tr>
-                <th scope="row">{{ job.method }}</th>
-                <td>{{ job.url }}</td>
-                <td>{{ job.created_at }}</td>
+                <td><a href="/res/{{ job.id }}/show">{{ job.url }}</a></td>
+                <td>{{ job.method }}</td>
                 <td>
+
                     {% if job.code > 0 %}
-                    <span class="badge text-bg-primary">{{ job.code }}</span>
+                        <span class="badge text-bg-primary">{{ job.status }}</span>
+                    {% else %}
+                        <span class="badge text-bg-secondary">new</span>
                     {% endif %}
                 </td>
                 <td>
-                    {% if job.code > 0 %}
-                    <a class="btn btn-sm btn-outline-primary" href="/result?url={{ job.url }}">Result</a></td>
-                {% endif %}
+                    <a class="btn btn-sm btn-outline-primary" href="/res/{{ job.id }}/show">Show</a>
+                    <a class="btn btn-sm btn-outline-secondary" href="/res/{{ job.id }}/edit">Edit</a>
+                </td>
             </tr>
             {% endfor %}
             </tbody>
