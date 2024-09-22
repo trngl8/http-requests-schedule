@@ -16,25 +16,33 @@ $twig = $kernel->getTemplateEngine();
 $request = Request::createFromGlobals();
 
 $routes = new RouteCollection();
-$routes->add('index', new Route('/', ['_controller' => 'App\Controller\IndexController::index']));
-$routes->add('add', new Route('/add', ['_controller' => 'App\Controller\IndexController::add']));
-$routes->add('run', new Route('/run', ['_controller' => 'App\Controller\IndexController::run']));
-$routes->add('result', new Route('/result', ['_controller' => 'App\Controller\IndexController::result']));
+$routes->add('app_index', new Route('/', [
+    '_controller' => App\Controller\IndexController::class,
+    '_method' => 'index'
+]));
+$routes->add('app_add', new Route('/add', [
+    '_controller' => App\Controller\IndexController::class,
+    '_method' => 'add'
+]));
+$routes->add('app_run', new Route('/run', [
+    '_controller' => App\Controller\IndexController::class,
+    '_method' => 'run'
+]));
+$routes->add('app_result', new Route('/result', [
+    '_controller' => App\Controller\IndexController::class,
+    '_method' => 'result'
+]));
 
 $context = new RequestContext();
-$context->fromRequest($request);
 $matcher = new UrlMatcher($routes, $context);
 
 $attributes = $matcher->match($request->getPathInfo());
 
 try {
     $request->attributes->add($attributes);
-    $parts = explode('::', $attributes['_controller']);
-    $controller = [new $parts[0]($twig, $request), $parts[1]];
+    $controller = new $attributes['_controller']($twig);
 
-    $arguments = [$request, $twig];
-
-    $response = call_user_func_array($controller, $arguments);
+    $response = call_user_func_array([$controller, $attributes['_method']], [$request]);
 } catch (ResourceNotFoundException $exception) {
     $response = new Response('Not Found', 404);
 } catch (\Exception $exception) {

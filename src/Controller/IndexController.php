@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class IndexController extends BaseController
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $db = new \SQLite3('../var/localhost.db', SQLITE3_OPEN_READONLY);
 
