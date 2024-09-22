@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
+use App\Database;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -10,14 +10,13 @@ use Twig\Error\SyntaxError;
 
 abstract class BaseController
 {
-    private Request $request;
-
+    protected Database $database;
     private Environment $twig;
 
-    public function __construct(Environment $twig, Request $request)
+    public function __construct(Environment $twig, Database $database)
     {
-        $this->request = $request;
         $this->twig = $twig;
+        $this->database = $database;
     }
 
     /**
